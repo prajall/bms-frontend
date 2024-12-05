@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* White background */
+    --foreground: 240 10% 3.9%; /* Dark text */
+    --primary-color: 217 89% 61%; /* Blue primary */
+    --primary-foreground: 0 0% 98%;
+    --secondary-color: 240 59% 50%;
+    --secondary-foreground: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%; /* Dark background */
+    --foreground: 0 0% 95%; /* Light text */
+    --primary-color: 217 89% 61%;
+    --primary-foreground: 0 0% 98%;
+    --secondary-color: 240 59% 50%;
+    --secondary-foreground: 240 5.9% 10%;
+  }
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    @apply bg-background text-foreground;
+  }
+
+  .custom-input {
+    @apply rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300;
+  }
+
+
+
+}
