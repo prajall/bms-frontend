@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
 import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
-import { Button } from "@/components/ui/button";
 import AddButton from "@/components/ui/buttons/AddButton";
 import { DeleteIcon, EditIcon, ShowIcon } from "@/components/ui/buttons/IconBtn";
 import Modal from "@/components/ui/Model";
@@ -12,7 +11,6 @@ type Part = {
   id: string;
   image: string;
   name: string;
-  sku: string;
   sellingPrice: string;
   costPrice: string;
   category: string;
@@ -34,11 +32,8 @@ const columns = [
     width: '90px',
   },
   { name: 'Part Name', selector: (row: Part) => row.name, sortable: true, wrap: true },
-  { name: 'SKU', selector: (row: Part) => row.sku, sortable: true },
   { name: 'Selling Price', selector: (row: Part) => row.sellingPrice, sortable: true },
   { name: 'Cost Price', selector: (row: Part) => row.costPrice, sortable: true },
-  { name: 'Category', selector: (row: Part) => row.category, sortable: true, wrap: true },
-  { name: 'Unit', selector: (row: Part) => row.unit, sortable: true },
   { name: 'Stock', selector: (row: Part) => row.stock, sortable: true },
   {
     name: 'Action',
@@ -46,7 +41,7 @@ const columns = [
       <div className="inline-flex space-x-2">
         <ShowIcon link={`/admin/part/show/${row.id}`} />
         <EditIcon link={`/admin/part/edit/${row.id}`} />
-        <DeleteIcon onClick={() => handleAction('delete', row.id)} />
+        {/* <DeleteIcon onClick={() => handleAction('delete', row.id)} /> */}
       </div>
     ),
     sortable: false
@@ -66,18 +61,15 @@ const PartIndex = () => {
   useEffect(() => {
     const fetchpartData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/product`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/part`);
         
         if (response.status === 200 && response.data.success) {
           const formattedData = response.data.data.parts.map((part: any) => ({
             id: part._id, 
             image: part.baseImage.small || "", 
             name: part.name,
-            sku: part.sku,
             sellingPrice: part.sellingPrice,
             costPrice: part.costPrice,
-            category: part.category,
-            unit: part.weight.unit,
             stock: part.stock,
           }));
           setpartData(formattedData);
