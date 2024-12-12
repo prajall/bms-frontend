@@ -32,9 +32,12 @@ import EditCategory from "@/pages/admin/productCategory/Edit";
 
 import PartIndex from "@/pages/admin/parts/Index";
 
+import POSIndex from "@/pages/admin/POS/Index";
+
 import ProductInstallationIndex from "@/pages/admin/productInstallation/Index";
 
 import ServiceIndex from "@/pages/admin/services/service/Index";
+import TitleUpdater from "@/components/admin/Header/HeaderTitle";
 
 const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const isAuthenticated = useSelector(
@@ -50,7 +53,7 @@ const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   }, [isAuthenticated]);
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
@@ -63,6 +66,7 @@ const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
 const AppRouter: React.FC = () => {
   return (
     <Router>
+      <TitleUpdater />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
@@ -70,7 +74,7 @@ const AppRouter: React.FC = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/test" element={<TestPage />} />
         {/* Private routes */}
-        
+
         {/* Private routes */}
         {/* <Route element={<PrivateRoute />}>
           <Route element={<AdminLayout />}>
@@ -81,7 +85,7 @@ const AppRouter: React.FC = () => {
 
         {/* admin route  start*/}
         <Route
-          path="/dashboard"
+          path="/admin"
           element={
             <PrivateRoute>
               <AdminLayout>
@@ -217,10 +221,21 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           }
         />
+        {/* POS */}
+        <Route
+          path="/admin/pos"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <POSIndex />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
 
         {/* product inatallation */}
         <Route
-          path="/admin/products-installation"
+          path="/admin/products_installation"
           element={
             <PrivateRoute>
               <AdminLayout>
@@ -244,7 +259,7 @@ const AppRouter: React.FC = () => {
 
         {/* admin route  end*/}
 
-        <Route path="*" element={<Navigate to="/landing" />} />
+        {/* <Route path="*" element={<Navigate to="/landing" />} /> */}
       </Routes>
     </Router>
   );

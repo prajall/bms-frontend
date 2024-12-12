@@ -15,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Header from "../components/Header";
 
 const NewProducts = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -114,7 +113,6 @@ const NewProducts = () => {
 
   return (
     <div className="flex-1 overflow-auto">
-      <Header pageTitle="Add New Product" />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-16">
         <Card>
           <CardHeader>

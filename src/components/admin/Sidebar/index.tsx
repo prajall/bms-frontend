@@ -1,24 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
 import {
-  Home,
-  Grid,
-  DollarSign,
-  Users,
-  UserCircle,
-  Shield,
-  Wrench,
-  Calendar,
-  ShoppingCart,
-  FileText,
   BarChart2,
+  Calendar,
+  Circle,
+  DollarSign,
   FileIcon,
+  FileText,
   GitBranch,
+  Grid,
+  Home,
   Settings,
+  Shield,
+  ShoppingCart,
+  Users,
+  Wrench,
 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import SidebarLinkGroup from "./SidebarLinkGroup";
 import Logo from "../../../assets/images/logo.png";
-import { link } from "fs";
+import SidebarLinkGroup from "./SidebarLinkGroup";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -29,26 +28,35 @@ const menuItems = [
   {
     name: "Dashboard",
     icon: Home,
-    link: "/dashboard",
+    link: "/admin",
+    title: "Dashboard",
   },
   {
     name: "Items",
     icon: Grid,
     link: "#",
     children: [
-      { name: "Category", link: "/admin/category"},
-      { name: "Product", link: "/admin/products" },
-      { name: "Parts", link: "/admin/parts" },
+      { name: "Category", link: "/admin/category", title: "Items-Category" },
+      { name: "Product", link: "/admin/products", title: "Items-Products" },
+      { name: "Parts", link: "/admin/parts", title: "Items-Parts" },
     ],
   },
-  { name: "POS", icon: DollarSign, link: "/pos" },
+  { name: "POS", icon: DollarSign, link: "/pos", title: "Point of Sale" },
   {
     name: "Users",
     icon: Users,
     link: "#",
     children: [
-      { name: "Customers", link: "/admin/customers" },
-      { name: "Employee", link: "/admin/employees" },
+      {
+        name: "Customers",
+        link: "/admin/customers",
+        title: "Customers Management",
+      },
+      {
+        name: "Employee",
+        link: "/admin/employees",
+        title: "Employee Management",
+      },
     ],
   },
   {
@@ -56,8 +64,12 @@ const menuItems = [
     icon: Wrench,
     link: "#",
     children: [
-      { name: "Product Installation", link: "/admin/products-installation" },
-      { name: "Service", link: "/admin/service" },
+      {
+        name: "Installation",
+        link: "/admin/products-installation",
+        title: "Products Installation",
+      },
+      { name: "Service", link: "/admin/service", title: "Service Management" },
     ],
   },
   { name: "Roles and Permission", icon: Shield, link: "/admin/roles" },
@@ -70,7 +82,6 @@ const menuItems = [
   { name: "Configuration", icon: Settings, link: "/configuration" },
 ];
 
-
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const location = useLocation();
   const { pathname } = location;
@@ -78,9 +89,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
-  const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
+  const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
   const [sidebarExpanded, setSidebarExpanded] = useState(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
   );
 
   // close on click outside
@@ -95,8 +106,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         return;
       setSidebarOpen(false);
     };
-    document.addEventListener('click', clickHandler);
-    return () => document.removeEventListener('click', clickHandler);
+    document.addEventListener("click", clickHandler);
+    return () => document.removeEventListener("click", clickHandler);
   });
 
   // close if the esc key is pressed
@@ -105,29 +116,29 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       if (!sidebarOpen || keyCode !== 27) return;
       setSidebarOpen(false);
     };
-    document.addEventListener('keydown', keyHandler);
-    return () => document.removeEventListener('keydown', keyHandler);
+    document.addEventListener("keydown", keyHandler);
+    return () => document.removeEventListener("keydown", keyHandler);
   });
 
   useEffect(() => {
-    localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
+    localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
     if (sidebarExpanded) {
-      document.querySelector('body')?.classList.add('sidebar-expanded');
+      document.querySelector("body")?.classList.add("sidebar-expanded");
     } else {
-      document.querySelector('body')?.classList.remove('sidebar-expanded');
+      document.querySelector("body")?.classList.remove("sidebar-expanded");
     }
   }, [sidebarExpanded]);
 
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-white duration-300 ease-linear dark:bg-boxdark dark:bg-black lg:static lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      className={`absolute  p-4 border-r border-gray-200 left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-white duration-300 ease-linear dark:bg-boxdark dark:bg-black lg:static lg:translate-x-0 ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between px-5 py-2 lg:flex-col lg:items-center lg:gap-4">
-        <NavLink to="/dashboard" className="lg:mb-4 lg:mt-5">
+      <div className="flex items-center justify-between lg:flex-col lg:items-center lg:gap-4">
+        <NavLink to="/dashboard" className="">
           <img src={Logo} alt="Logo" className="mx-auto" />
         </NavLink>
         <button
@@ -154,98 +165,104 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       </div>
       {/* <!-- SIDEBAR HEADER --> */}
 
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+      <div className="no-scrollbar flex flex-col overflow-y-auto no-scrollbar duration-300 ease-linear">
         {/* <!-- Sidebar Menu --> */}
-        <nav className="mt-5 py-4 px-4 lg:mt-2 lg:px-6">
+        <nav className="mt-5">
           {/* <!-- Menu Group --> */}
-          <div>      
+          <div>
             <ul className="mb-6 flex flex-col gap-1.5">
-                {menuItems.map((item) => {
-                    if (item.children) {
-                    // Handle dropdown menu
-                        return (
-                            <SidebarLinkGroup
-                            key={item.name}
-                            activeCondition={pathname.includes(item.link)}
+              {menuItems.map((item) => {
+                if (item.children) {
+                  // Handle dropdown menu
+                  return (
+                    <SidebarLinkGroup
+                      key={item.name}
+                      activeCondition={pathname.includes(item.link)}
+                    >
+                      {(handleClick, open) => (
+                        <React.Fragment>
+                          <NavLink
+                            to="#"
+                            className={`group relative flex items-center gap-2.5 rounded-lg py-2 px-2 font-medium text-bodydark1  ease-in-out hover:bg-primary hover:text-white dark:hover:bg-meta-4${
+                              pathname.includes(item.link) &&
+                              "bg-graydark dark:bg-meta-4"
+                            }`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              sidebarExpanded
+                                ? handleClick()
+                                : setSidebarExpanded(true);
+                            }}
+                          >
+                            <div className="group-hover:bg-white group-hover:text-primary p-2 rounded-md">
+                              <item.icon className=" w-5 h-5" />
+                            </div>
+                            {item.name}
+                            <svg
+                              className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
+                                !open && "-rotate-90"
+                              }`}
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                            {(handleClick, open) => (
-                                <React.Fragment>
-                                <NavLink
-                                    to="#"
-                                    className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-primary hover:text-white dark:hover:bg-meta-4 ${
-                                    pathname.includes(item.link) &&
-                                    "bg-graydark dark:bg-meta-4"
-                                    }`}
-                                    onClick={(e) => {
-                                    e.preventDefault();
-                                    sidebarExpanded
-                                        ? handleClick()
-                                        : setSidebarExpanded(true);
-                                    }}
-                                >
-                                    <item.icon className="fill-current w-5 h-5" />
-                                    {item.name}
-                                    <svg
-                                    className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
-                                        open && "rotate-180"
-                                    }`}
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 20 20"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                    <path
-                                        fillRule="evenodd"
-                                        clipRule="evenodd"
-                                        d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
-                                        fill=""
-                                    />
-                                    </svg>
-                                </NavLink>
-                                <div
-                                    className={`translate transform overflow-hidden ${
-                                    !open && "hidden"
-                                    }`}
-                                >
-                                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
-                                    {item.children.map((child) => (
-                                        <li key={child.name}>
-                                        <NavLink
-                                            to={child.link}
-                                            className={({ isActive }) =>
-                                            `group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-primary ${
-                                                isActive && "!text-primary"
-                                            }`
-                                            }
-                                        >
-                                            {child.name}
-                                        </NavLink>
-                                        </li>
-                                    ))}
-                                    </ul>
-                                </div>
-                                </React.Fragment>
-                            )}
-                            </SidebarLinkGroup>
-                        );
-                    }
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
+                                fill=""
+                              />
+                            </svg>
+                          </NavLink>
+                          <div
+                            className={`translate transform overflow-hidden ${
+                              !open && "hidden"
+                            }`}
+                          >
+                            <ul className="mb-1 flex flex-col gap-4 pl-6 mt-2">
+                              {item.children.map((child) => (
+                                <li key={child.name}>
+                                  <NavLink
+                                    to={child.link}
+                                    className={({ isActive }) =>
+                                      `group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-primary ${
+                                        isActive && "!text-primary"
+                                      }`
+                                    }
+                                  >
+                                    <Circle size={10} />
+                                    {child.name}
+                                  </NavLink>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </React.Fragment>
+                      )}
+                    </SidebarLinkGroup>
+                  );
+                }
 
-                    // Render simple menu items
-                    return (
-                    <li key={item.name}>
-                        <NavLink
-                        to={item.link}
-                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-primary hover:text-white dark:hover:bg-meta-4 ${
-                            pathname.includes(item.link) && "bg-graydark dark:bg-meta-4"
-                        }`}
-                        >
-                        <item.icon className="fill-current w-5 h-5" />
-                        {item.name}
-                        </NavLink>
-                    </li>
-                    );
-                })}
+                // Render simple menu items
+                return (
+                  <li key={item.name}>
+                    <NavLink
+                      to={item.link}
+                      className={`group relative flex items-center gap-2.5 rounded-lg py-2 px-2 font-medium text-bodydark1 ease-in-out hover:bg-primary hover:text-white dark:hover:bg-meta-4 ${
+                        pathname.includes(item.link) &&
+                        "bg-graydark dark:bg-meta-4"
+                      }`}
+                    >
+                      <div className="group-hover:bg-white group-hover:text-primary p-2 rounded-md">
+                        <item.icon className=" w-5 h-5" />
+                      </div>
+                      {item.name}
+                    </NavLink>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </nav>

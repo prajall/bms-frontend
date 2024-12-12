@@ -6,6 +6,7 @@ import axios from "axios";
 import { useTheme } from "./utils/themes.utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import TitleUpdater from "./components/admin/Header/HeaderTitle";
 
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,8 +45,9 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`theme-${theme}`}>
+    <div className={`theme-${theme} font-poppins`}>
       <AppRouter />
+
       <ToastContainer />
     </div>
   );

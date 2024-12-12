@@ -4,14 +4,19 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import ImageUploader from "@/components/ImageUploader";
 import CategorySelect from "@/components/formElements/CategorySelect";
 import BrandSelect from "@/components/formElements/BrandSelect";
 import VariantsSelect from "@/components/formElements/VariantsSelect";
 import TextEditor from "@/components/ui/TextEditor";
-
 
 interface Warranty {
   duration: number;
@@ -70,14 +75,26 @@ interface ProductFormProps {
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [images, setImages] = useState<(File | string)[]>(initialData?.images || []);
-  const [selectedStatus, setSelectedStatus] = useState(initialData?.status || "active");
-  const [selectedCondition, setSelectedCondition] = useState(initialData?.condition || "new");
-  const [selectedCategory, setSelectedCategory] = useState(initialData?.category || "");
-  const [selectedBrand, setSelectedBrand] = useState(initialData?.brand || ""); 
-  const [selectedVariants, setSelectedVariants] = useState(initialData?.variants || ""); 
-  const [editorContent, setEditorContent] = React.useState('');
-  const [keyFeatures, setKeyFeatures] = useState<string[]>(initialData?.keyFeatures || []);
+  const [images, setImages] = useState<(File | string)[]>(
+    initialData?.images || []
+  );
+  const [selectedStatus, setSelectedStatus] = useState(
+    initialData?.status || "active"
+  );
+  const [selectedCondition, setSelectedCondition] = useState(
+    initialData?.condition || "new"
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialData?.category || ""
+  );
+  const [selectedBrand, setSelectedBrand] = useState(initialData?.brand || "");
+  const [selectedVariants, setSelectedVariants] = useState(
+    initialData?.variants || ""
+  );
+  const [editorContent, setEditorContent] = React.useState("");
+  const [keyFeatures, setKeyFeatures] = useState<string[]>(
+    initialData?.keyFeatures || []
+  );
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [warranty, setWarranty] = useState<Warranty>(
     initialData?.warranty || { duration: 0, description: "" }
@@ -85,9 +102,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
   const [dimensions, setDimensions] = useState<Dimensions>(
     initialData?.dimensions || { width: 0, height: 0, length: 0, unit: "cm" }
   );
-  const [weight, setWeight] = useState<Weight>(initialData?.weight || { value: 0, unit: "kg" });
-  const [seo, setSEO] = useState<SEO>(initialData?.seo || { slug: "" ,metaTitle: "",  metaDescription: "" });
-  
+  const [weight, setWeight] = useState<Weight>(
+    initialData?.weight || { value: 0, unit: "kg" }
+  );
+  const [seo, setSEO] = useState<SEO>(
+    initialData?.seo || { slug: "", metaTitle: "", metaDescription: "" }
+  );
 
   const defaultValues: ProductFormData = {
     name: "",
@@ -97,7 +117,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
     costPrice: 0,
     sellingPrice: 0,
     discount: 0,
-    category: '',
+    category: "",
     images: [],
     stock: 0,
     status: "active",
@@ -114,8 +134,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
     minimumOrderQuantity: 0,
     dimensions: { width: 0, height: 0, length: 0, unit: "cm" },
     weight: { value: 0, unit: "kg" },
-    variants: '',
-    seo: { slug: "" ,metaTitle: "",  metaDescription: "" },
+    variants: "",
+    seo: { slug: "", metaTitle: "", metaDescription: "" },
     ...initialData,
   };
 
@@ -136,7 +156,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
 
   useEffect(() => {
     if (initialData?.description) {
-      setEditorContent(initialData.description); 
+      setEditorContent(initialData.description);
     }
   }, [initialData]);
 
@@ -153,7 +173,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
   const handleImageUpload = (index: number, image: File) => {
     setImages((prev) => {
       const updatedImages = [...prev];
-      updatedImages[index] = image; 
+      updatedImages[index] = image;
       return updatedImages;
     });
   };
@@ -222,14 +242,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
     }
   };
 
-  const handleWarrantyChange = (field: keyof Warranty, value: string | number) => {
+  const handleWarrantyChange = (
+    field: keyof Warranty,
+    value: string | number
+  ) => {
     setWarranty((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleDimensionsChange = (field: keyof Dimensions, value: number | string) => {
+  const handleDimensionsChange = (
+    field: keyof Dimensions,
+    value: number | string
+  ) => {
     setDimensions((prev) => ({
       ...prev,
       [field]: typeof value === "number" ? value : value.trim(),
@@ -249,7 +275,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
       [field]: value,
     }));
   };
-
 
   const handleFormSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
@@ -271,11 +296,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
           if (typeof img === "string") {
             formData.append("images[]", img);
           } else if (img instanceof File) {
-            formData.append("images[]", img.name); 
+            formData.append("images[]", img.name);
           }
         });
       } else if (key === "keyFeatures") {
-        keyFeatures.forEach((feature) => formData.append("keyFeatures[]", feature));
+        keyFeatures.forEach((feature) =>
+          formData.append("keyFeatures[]", feature)
+        );
       } else if (key === "tags") {
         tags.forEach((tag) => formData.append("tags[]", tag));
       } else if (Array.isArray(value)) {
@@ -291,12 +318,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
       } else if (key === "seo") {
         Object.entries(seo).forEach(([seoKey, seoValue]) => {
           formData.append(`seo.${seoKey}`, seoValue.toString());
-        });     
-      } else if (key === "warranty") { 
+        });
+      } else if (key === "warranty") {
         Object.entries(warranty).forEach(([warrantyKey, warrantyValue]) => {
           formData.append(`warranty.${warrantyKey}`, warrantyValue.toString());
         });
-      }else {
+      } else {
         formData.append(key, value as string | Blob);
       }
     });
@@ -312,7 +339,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
             {/* Name */}
             <div>
-              <Label htmlFor="name">Product Name <span className="text-red-400">*</span></Label>
+              <Label htmlFor="name">
+                Product Name <span className="text-red-400">*</span>
+              </Label>
               <Input
                 {...register("name", { required: "Product Name is required" })}
                 id="name"
@@ -320,7 +349,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                 placeholder="Enter product name"
               />
               {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -334,7 +365,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                 placeholder="Enter SKU"
               />
               {errors.sku && (
-                <p className="text-red-500 text-xs mt-1">{errors.sku.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.sku.message}
+                </p>
               )}
             </div>
 
@@ -345,13 +378,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                 selectedBrand={selectedBrand}
                 onChange={handleBrandChange}
                 showAddBrandButton={true}
-                id = "brand"
+                id="brand"
               />
             </div>
 
             {/* Category */}
             <div>
-              <Label htmlFor="category">Category <span className="text-red-400">*</span></Label>
+              <Label htmlFor="category">
+                Category <span className="text-red-400">*</span>
+              </Label>
               <CategorySelect
                 selectedCategory={selectedCategory}
                 onChange={handleCategoryChange}
@@ -361,10 +396,24 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
 
             {/* Additional Fields */}
             {[
-              { label: "Cost Price", id: "costPrice", type: "number", required: true },
-              { label: "Selling Price", id: "sellingPrice", type: "number", required: true },
+              {
+                label: "Cost Price",
+                id: "costPrice",
+                type: "number",
+                required: true,
+              },
+              {
+                label: "Selling Price",
+                id: "sellingPrice",
+                type: "number",
+                required: true,
+              },
               { label: "Discount", id: "discount", type: "number" },
-              { label: "Minimum Order Quantity", id: "minimumOrderQuantity", type: "number" },
+              {
+                label: "Minimum Order Quantity",
+                id: "minimumOrderQuantity",
+                type: "number",
+              },
               { label: "Model No.", id: "modelNo", type: "string" },
               { label: "Serial No.", id: "serialNo", type: "string" },
             ].map(({ label, id, type, required }) => (
@@ -373,7 +422,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                   {label} {required && <span className="text-red-400">*</span>}
                 </Label>
                 <Input
-                  {...register(id as keyof ProductFormData, required ? { required: `${label} is required` } : {})}
+                  {...register(
+                    id as keyof ProductFormData,
+                    required ? { required: `${label} is required` } : {}
+                  )}
                   id={id}
                   type={type}
                   placeholder={`Enter ${label.toLowerCase()}`}
@@ -396,7 +448,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                 placeholder="Enter stock quantity"
               />
               {errors.stock && (
-                <p className="text-red-500 text-xs mt-1">{errors.stock.message}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.stock.message}
+                </p>
               )}
             </div>
 
@@ -469,7 +523,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
             {/* Status */}
             <div>
               <Label htmlFor="condition">Condition</Label>
-              <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+              <Select
+                value={selectedCondition}
+                onValueChange={setSelectedCondition}
+              >
                 <SelectTrigger id="condition">
                   <SelectValue placeholder="Select condition" />
                 </SelectTrigger>
@@ -485,8 +542,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
             <div className="lg:col-span-2">
               <Label htmlFor="description">Description</Label>
               <TextEditor
-                value={editorContent} 
-                onChange={handleEditorChange} 
+                value={editorContent}
+                onChange={handleEditorChange}
                 id="description"
               />
               {errors.description && (
@@ -494,7 +551,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                   {errors.description.message}
                 </p>
               )}
-              
             </div>
 
             {/* Warranty */}
@@ -507,7 +563,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                     id="warrantyDuration"
                     type="number"
                     value={warranty.duration}
-                    onChange={(e) => handleWarrantyChange("duration", parseInt(e.target.value, 10))}
+                    onChange={(e) =>
+                      handleWarrantyChange(
+                        "duration",
+                        parseInt(e.target.value, 10)
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -516,13 +577,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                     id="warrantyDescription"
                     type="text"
                     value={warranty.description}
-                    onChange={(e) => handleWarrantyChange("description", e.target.value)}
+                    onChange={(e) =>
+                      handleWarrantyChange("description", e.target.value)
+                    }
                   />
                 </div>
               </div>
             </div>
-            
-             {/* Dimensions */}
+
+            {/* Dimensions */}
             <div className="lg:col-span-2">
               <Label>Dimensions</Label>
               <div className="grid grid-cols-4 gap-4">
@@ -532,7 +595,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                     type="number"
                     placeholder="Width"
                     value={dimensions.width}
-                    onChange={(e) => handleDimensionsChange("width", parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      handleDimensionsChange(
+                        "width",
+                        parseFloat(e.target.value)
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -541,7 +609,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                     type="number"
                     placeholder="Height"
                     value={dimensions.height}
-                    onChange={(e) => handleDimensionsChange("height", parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      handleDimensionsChange(
+                        "height",
+                        parseFloat(e.target.value)
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -550,7 +623,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                     type="number"
                     placeholder="Length"
                     value={dimensions.length}
-                    onChange={(e) => handleDimensionsChange("length", parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      handleDimensionsChange(
+                        "length",
+                        parseFloat(e.target.value)
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -558,7 +636,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                   <select
                     className="block w-full border border-gray-300 rounded px-2 py-2"
                     value={dimensions.unit}
-                    onChange={(e) => handleDimensionsChange("unit", e.target.value)}
+                    onChange={(e) =>
+                      handleDimensionsChange("unit", e.target.value)
+                    }
                   >
                     <option value="cm">cm</option>
                     <option value="inch">inch</option>
@@ -576,7 +656,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
                   type="number"
                   placeholder="Weight"
                   value={weight.value}
-                  onChange={(e) => handleWeightChange("value", parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    handleWeightChange("value", parseFloat(e.target.value))
+                  }
                 />
                 <select
                   className="block w-full border border-gray-300 rounded px-2 py-2"
@@ -595,40 +677,46 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
               <Label htmlFor="seoSlug">SEO</Label>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <Label htmlFor="seoSlug">Slug</Label>
-                    <Input
-                      id="seoSlug"
-                      type="text"
-                      placeholder="Enter SEO Slug"
-                      value={seo.slug}
-                      onChange={(e) => handleSEOChange("slug", e.target.value)}
-                    />
+                  <Label htmlFor="seoSlug">Slug</Label>
+                  <Input
+                    id="seoSlug"
+                    type="text"
+                    placeholder="Enter SEO Slug"
+                    value={seo.slug}
+                    onChange={(e) => handleSEOChange("slug", e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="metaTitle">Meta Title</Label>
-                    <Input
-                      id="metaTitle"
-                      type="text"
-                      placeholder="Enter Meta Title"
-                      value={seo.metaTitle}
-                      onChange={(e) => handleSEOChange("metaTitle", e.target.value)}
-                    />
+                  <Input
+                    id="metaTitle"
+                    type="text"
+                    placeholder="Enter Meta Title"
+                    value={seo.metaTitle}
+                    onChange={(e) =>
+                      handleSEOChange("metaTitle", e.target.value)
+                    }
+                  />
                 </div>
                 <div className="lg:col-span-2">
                   <Label htmlFor="metaDescription">Meta Description</Label>
-                    <Input
-                      id="metaDescription"
-                      type="text"
-                      placeholder="Enter Meta Description"
-                      value={seo.metaDescription}
-                      onChange={(e) => handleSEOChange("metaDescription", e.target.value)}
-                    />
+                  <Input
+                    id="metaDescription"
+                    type="text"
+                    placeholder="Enter Meta Description"
+                    value={seo.metaDescription}
+                    onChange={(e) =>
+                      handleSEOChange("metaDescription", e.target.value)
+                    }
+                  />
                 </div>
               </div>
             </div>
 
             {/* Category */}
             <div>
+              <Label htmlFor="metaDescription">Variants</Label>
+
               <VariantsSelect
                 selectedVariants={selectedVariants}
                 onChange={handleVariantsChange}
@@ -654,44 +742,53 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit }) => {
             <div className="mt-6 lg:col-span-2">
               <Label>Images</Label>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-4">
-              {images.map((image, index) => (
-                <div key={index} className="relative">
-                  {typeof image === "string" ? (
-                    <div className="relative">
-                      {/* Image preview for existing images */}
-                      <img src={image} alt={`Image ${index + 1}`} className="w-full h-auto rounded-lg" />
-                      <button
-                        type="button"
-                        className="absolute top-0 right-0 text-white bg-red-500 hover:bg-red-600 rounded-full p-1"
-                        onClick={() => handleRemoveImage(index)}
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ) : (
-                    // File input for new uploads
-                    <ImageUploader
-                      onImageUpload={(uploadedImage) => handleImageUpload(index, uploadedImage)}
-                      onRemove={() => handleRemoveImage(index)}
-                    />
-                  )}
-                </div>
-              ))}
+                {images.map((image, index) => (
+                  <div key={index} className="relative">
+                    {typeof image === "string" ? (
+                      <div className="relative">
+                        {/* Image preview for existing images */}
+                        <img
+                          src={image}
+                          alt={`Image ${index + 1}`}
+                          className="w-full h-auto rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-0 right-0 text-white bg-red-500 hover:bg-red-600 rounded-full p-1"
+                          onClick={() => handleRemoveImage(index)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ) : (
+                      // File input for new uploads
+                      <ImageUploader
+                        onImageUpload={(uploadedImage) =>
+                          handleImageUpload(index, uploadedImage)
+                        }
+                        onRemove={() => handleRemoveImage(index)}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addImage}
+                className="mt-4 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg"
+              >
+                + Add Image
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={addImage}
-              className="mt-4 px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg"
-            >
-              + Add Image
-            </button>
-          </div>
-
           </div>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : initialData ? "Update Product" : "Create Product"}
+            {isSubmitting
+              ? "Submitting..."
+              : initialData
+              ? "Update Product"
+              : "Create Product"}
           </Button>
         </CardFooter>
       </Card>
