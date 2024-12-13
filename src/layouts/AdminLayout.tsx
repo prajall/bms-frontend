@@ -1,16 +1,23 @@
 import React, { useState, ReactNode } from "react";
+import { useLocation } from "react-router-dom"; // Import useRouter
 import Header from "@/components/admin/Header";
 import Sidebar from "@/components/admin/Sidebar";
 
 const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation(); // Get the current location
+
+  // Determine if the current route is /admin/pos
+  const isPosRoute = location.pathname === "/admin/pos";
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex h-screen overflow-hidden">
         {/* <!-- ===== Sidebar Start ===== --> */}
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        {!isPosRoute && (
+          <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        )}
         {/* <!-- ===== Sidebar End ===== --> */}
 
         {/* <!-- ===== Content Area Start ===== --> */}
