@@ -38,7 +38,7 @@ const ServiceIndex = () => {
         `${import.meta.env.VITE_API_URL}/service`
       );
       if (response.status === 200 && response.data.success) {
-        const formattedData = response.data.data.map((item: any) => ({
+        const formattedData = response.data.data.services.map((item: any) => ({
           id: item._id,
           title: item.title || "",
           serviceType: item.serviceType || "",

@@ -63,7 +63,7 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({
     };
 
   const options = customers.map((customer) => ({
-    value: customer.name,
+    value: customer._id,
     label: customer.name,
   }));
 

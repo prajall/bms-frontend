@@ -6,20 +6,23 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { Select, SelectValue, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
 import TextEditor from '@/components/ui/TextEditor';
-import CustomerSelect from '@/components/formElements/CustomerSelect';
 import { MultiProduct } from '@/components/formElements/ProductSelect';
 import { MultiPart } from '@/components/formElements/PartSelect';
+
+interface ProductOrPart {
+  _id: string;
+  [key: string]: any; // Add this if there are additional properties you want to allow
+}
 
 // Define the type for the form data
 interface ServiceFormData {
     title: string;
     serviceType: string;
-    products: string[];
-    parts: string[];
+    products: (string | ProductOrPart)[];
+    parts: (string | ProductOrPart)[];
     workDetail: string;
     isRecurring: boolean;
     interval: number;
-    customerId: string;
     serviceCharge: number;
     additionalNotes: string;
     availability: string;
@@ -35,17 +38,9 @@ const type = [
     { value: 'repair', label: 'Repair' },
     { value: 'maintenance', label: 'Maintenance' },
     { value: 'replacement', label: 'Replacement' },
-  ];
+];
 
 const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
-  const [selectedType, setSelectedType] = useState(initialData?.serviceType || "");
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(initialData?.products || []);
-  const [selectedParts, setSelectedParts] = useState<string[]>(initialData?.parts || []);
-  const [workDetailContent, setWorkDetailContent] = useState(initialData?.workDetail || '');
-  const [addNoteContent, setAddNoteContent] = useState(initialData?.additionalNotes || '');
-  const [selectedAvailability, setSelectedAvailability] = useState(initialData?.availability || "");
-  const [selectedCustomer, setSelectedCustomer] = useState(initialData?.customerId || '');
-  
   const defaultValues: ServiceFormData = {
     title: '',
     serviceType: '',
@@ -54,7 +49,6 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
     workDetail: '',
     isRecurring: false,
     interval: 0,
-    customerId: '',
     serviceCharge: 0,
     additionalNotes: '',
     availability: '',
@@ -69,14 +63,43 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
     formState: { errors },
   } = useForm<ServiceFormData>({ defaultValues });
 
-  // Pre-fill the form with initialData if provided (edit mode)
+  const [selectedType, setSelectedType] = useState(initialData?.serviceType || "");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(
+    (initialData?.products || []).map((product) =>
+      typeof product === "object" ? product._id || "" : product || ""
+    )
+  );
+  const [selectedParts, setSelectedParts] = useState<string[]>(
+    (initialData?.parts || []).map((part) =>
+      typeof part === "object" ? part._id || "" : part || ""
+    )
+  );
+  const [workDetailContent, setWorkDetailContent] = useState(initialData?.workDetail || '');
+  const [addNoteContent, setAddNoteContent] = useState(initialData?.additionalNotes || '');
+  const [selectedAvailability, setSelectedAvailability] = useState(initialData?.availability || "");
+
   useEffect(() => {
     if (initialData) {
       Object.keys(initialData).forEach((key) => {
         setValue(key as keyof ServiceFormData, (initialData as any)[key]);
       });
+      setSelectedType(initialData.serviceType || "");
+      setSelectedProducts(
+      (initialData.products || []).map((product) =>
+        typeof product === "object" ? product._id || "" : product || ""
+      )
+    );
+    setSelectedParts(
+      (initialData.parts || []).map((part) =>
+        typeof part === "object" ? part._id || "" : part || ""
+      )
+    );
+      setWorkDetailContent(initialData.workDetail || '');
+      setAddNoteContent(initialData.additionalNotes || '');
+      setSelectedAvailability(initialData.availability || "");
     }
   }, [initialData, setValue]);
+
 
   const handleTypeChange = (value: string) => {
     setSelectedType(value);
@@ -91,11 +114,6 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
   const handlePartsChange = (values: string[]) => {
     setSelectedParts(values);
     setValue("parts", values); 
-  };
-
-  const handleCustomerChange = (value: string) => {
-    setSelectedCustomer(value);
-    setValue("customerId", value); 
   };
 
   const handleAvailabilityChange = (value: string) => {
@@ -192,17 +210,6 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
               {errors.interval && <p className="text-red-500 text-xs mt-1">{errors.interval.message}</p>}
             </div>
 
-            {/* Customer Select */}
-            <div className="mb-4">
-              <Label htmlFor="customerId">Customer</Label>
-              <CustomerSelect
-                selectedCustomer={selectedCustomer}
-                onChange={handleCustomerChange}
-                showAddCustomerButton={true}
-              />
-              {errors.customerId && <p className="text-red-500 text-xs mt-1">{errors.customerId.message}</p>}
-            </div>
-
             {/* Service Charge */}
             <div className="mb-4">
               <Label htmlFor="serviceCharge">Service Charge</Label>
@@ -258,7 +265,7 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
             </div>
 
             {/* Service Provided */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <Label htmlFor="serviceProvided">Service Provided</Label>
               <Input
                 {...register("serviceProvided")}
@@ -266,7 +273,7 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
                 placeholder="Enter additional services (comma separated)"
               />
               {errors.serviceProvided && <p className="text-red-500 text-xs mt-1">{errors.serviceProvided.message}</p>}
-            </div>
+            </div> */}
 
           </div>
         </CardContent>

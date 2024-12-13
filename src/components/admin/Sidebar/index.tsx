@@ -69,7 +69,16 @@ const menuItems = [
         link: "/admin/products-installation",
         title: "Products Installation",
       },
-      { name: "Service", link: "/admin/service", title: "Service Management" },
+      {
+        name: "Service",
+        link: "/admin/service",
+        title: "Service Management"
+      },
+      {
+        name: "Service Order",
+        link: "/admin/service_order",
+        title: "Service Management"
+      },
     ],
   },
   { name: "Roles and Permission", icon: Shield, link: "/admin/roles" },

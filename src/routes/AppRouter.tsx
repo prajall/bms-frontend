@@ -37,7 +37,11 @@ import POSIndex from "@/pages/admin/POS/Index";
 import ProductInstallationIndex from "@/pages/admin/productInstallation/Index";
 
 import ServiceIndex from "@/pages/admin/services/service/Index";
+import EditService from "@/pages/admin/services/service/Edit";
 import TitleUpdater from "@/components/admin/Header/HeaderTitle";
+
+import ServiceOrderIndex from "@/pages/admin/services/service-order";
+import EditServiceOrder from "@/pages/admin/services/service-order/edit";
 
 const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const isAuthenticated = useSelector(
@@ -252,6 +256,40 @@ const AppRouter: React.FC = () => {
             <PrivateRoute>
               <AdminLayout>
                 <ServiceIndex />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/service/edit/:id"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <EditService />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* service order */}
+        <Route
+          path="/admin/service_order"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <ServiceOrderIndex />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/service_order/edit/:id"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <EditServiceOrder />
               </AdminLayout>
             </PrivateRoute>
           }
