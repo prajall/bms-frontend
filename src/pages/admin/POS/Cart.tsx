@@ -3,8 +3,9 @@
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TableLayout from "@/components/admin/TableLayout";
+import Bill from "./Bill";
 
-export interface Product {
+export interface Item {
   _id: string;
   sellingPrice: number;
   name: string;
@@ -15,13 +16,14 @@ export interface Product {
   };
   modelNo: string;
 }
-export type CartItem = Product & { quantity: number };
+export type CartItem = Item & { quantity: number; type: string };
 
 interface CartProps {
   items: CartItem[];
   onUpdateQuantity: (itemId: string, newQuantity: number) => void;
   onRemoveItem: (itemId: string) => void;
   onEmptyCart: () => void;
+  onPay: () => void;
 }
 
 const Cart = ({
@@ -29,6 +31,7 @@ const Cart = ({
   onUpdateQuantity,
   onRemoveItem,
   onEmptyCart,
+  onPay,
 }: CartProps) => {
   const TAX_RATE = 0.13;
 
@@ -45,17 +48,17 @@ const Cart = ({
       width: "30%",
       selector: (row: CartItem) => row.name,
       cell: (row: CartItem) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           {row.baseImage && (
             <img
               src={row.baseImage.small}
               alt={row.name}
               width={40}
               height={40}
-              className="rounded py-2 "
+              className=" py-2 "
             />
           )}
-          {row.name}
+          <p className="line-clamp-1 text-xs">{row.name}</p>
         </div>
       ),
     },
@@ -72,7 +75,7 @@ const Cart = ({
           >
             -
           </Button>
-          <span>{row.quantity}</span>
+          <span className="w-6 text-center">{row.quantity}</span>
           <Button
             variant="outline"
             size="sm"
@@ -141,15 +144,13 @@ const Cart = ({
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button
-            variant="destructive"
-            className="flex-1"
-            onClick={onEmptyCart}
-          >
+        <div className="flex gap-2 border-t pt-4 justify-end">
+          {/* <Button variant="destructive" className="w-32" onClick={onEmptyCart}>
             Empty Cart
+          </Button> */}
+          <Button className="w-32" onClick={onPay}>
+            Pay Now
           </Button>
-          <Button className="flex-1">Pay</Button>
         </div>
       </div>
     </div>

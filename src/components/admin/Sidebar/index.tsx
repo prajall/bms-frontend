@@ -41,7 +41,7 @@ const menuItems = [
       { name: "Parts", link: "/admin/parts", title: "Items-Parts" },
     ],
   },
-  { name: "POS", icon: DollarSign, link: "/pos", title: "Point of Sale" },
+  { name: "POS", icon: DollarSign, link: "/admin/pos", title: "Point of Sale" },
   {
     name: "Users",
     icon: Users,
@@ -66,7 +66,7 @@ const menuItems = [
     children: [
       {
         name: "Installation",
-        link: "/admin/products-installation",
+        link: "/admin/products_installation",
         title: "Products Installation",
       },
       { name: "Service", link: "/admin/service", title: "Service Management" },
