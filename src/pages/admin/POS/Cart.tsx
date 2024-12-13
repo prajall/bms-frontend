@@ -95,10 +95,10 @@ const Cart = ({
     {
       name: "Action",
       style: {
-        textAlign: "center", // Center align the text in cells
+        textAlign: "center",
       },
       headerStyle: {
-        textAlign: "center", // Center align the text in the header
+        textAlign: "center",
       },
 
       cell: (row: CartItem) => (

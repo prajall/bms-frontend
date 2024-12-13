@@ -1,15 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// interface AuthState {
-//   user: any;
-//   isAuthenticated: boolean;
-// }
-
-// const initialState: AuthState = {
-//   isAuthenticated: false,
-//   user: null,
-// };
-
 const persistedUser = localStorage.getItem("user");
 const initialState = {
   isAuthenticated: persistedUser ? true : false,
