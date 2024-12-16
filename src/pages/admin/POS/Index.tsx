@@ -11,6 +11,9 @@ import { Customer } from "../customers/Index";
 import Cart, { CartItem, Item } from "./Cart";
 import { ItemGrid } from "./ItemsGrid";
 import Bill from "./Bill";
+import { Button } from "@/components/ui/button";
+import Modal from "@/components/ui/Model";
+import InstallationForm from "./InstallationForm";
 
 export default function POSPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -20,6 +23,7 @@ export default function POSPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [products, setProducts] = useState<Item[]>([]);
   const [parts, setParts] = useState<Item[]>([]);
+  const [discount, setDiscount] = useState<number>(0);
   const [selectedCustomer, setSelectedCustomer] = useState(
     "67554286140992b96228ae97"
   );
@@ -146,6 +150,59 @@ export default function POSPage() {
     setCartItems([]);
   };
 
+  const submitOrder = async () => {
+    if (cartItems.length === 0) {
+      toast.error("Cart is empty");
+      return;
+    }
+    console.log(cartItems);
+    const products = cartItems.filter((item) => (item.type = "product"));
+    const parts = cartItems.filter((item) => (item.type = "part"));
+    const data = {
+      products: products.map((product) => {
+        return {
+          productId: product._id,
+          quantity: product.quantity,
+          price: product.sellingPrice,
+        };
+      }),
+      parts: parts.map((part) => {
+        return {
+          partId: part._id,
+          quantity: part.quantity,
+          price: part.sellingPrice,
+        };
+      }),
+      customerType:
+        selectedCustomer === "67554286140992b96228ae97"
+          ? "walking"
+          : "registered",
+      customer: selectedCustomer,
+      subTotal,
+      discount,
+      tax: TAX_RATE * 100,
+      totalPrice: total,
+    };
+    console.log("Data: ", data);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/pos`,
+        data
+      );
+      console.log(response);
+      if (response.status === 201 && response.data.success) {
+        toast.success("Order Created Successfully");
+        handleEmptyCart();
+        setShowBill(false);
+      }
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      }
+    }
+  };
+
   const categories = [
     "All",
     "Refrigerator",
@@ -153,6 +210,15 @@ export default function POSPage() {
     "Heater",
     "Aqua Water Purifier",
   ];
+
+  const TAX_RATE = 0.13;
+  const subTotal = cartItems.reduce(
+    (sum, item) => sum + item.sellingPrice * item.quantity,
+    0
+  );
+  const discountAmount = (discount * subTotal) / 100 || 0;
+  const tax = (subTotal - discountAmount) * TAX_RATE;
+  const total = subTotal - discountAmount + tax;
 
   return (
     <div className="min-h-[80vh] flex flex-col">
@@ -163,20 +229,24 @@ export default function POSPage() {
             <TabsList className="flex justify-start">
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="parts">Parts</TabsTrigger>
+              <TabsTrigger value="installation">Installation</TabsTrigger>
             </TabsList>
           </Tabs>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            {activeTab === "products" ? (
+            {(activeTab === "products" || activeTab === "parts") && (
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            )}
+            {activeTab === "products" && (
               <Input
                 placeholder="Search Products..."
                 value={productSearchQuery}
                 onChange={(e) => setProductSearchQuery(e.target.value)}
                 className="pl-10"
               />
-            ) : (
+            )}
+            {activeTab === "parts" && (
               <Input
                 placeholder="Search Parts..."
                 value={partSearchQuery}
@@ -208,6 +278,7 @@ export default function POSPage() {
           {activeTab === "parts" && parts.length > 0 && (
             <ItemGrid items={parts} onItemClick={handlePartClick} />
           )}
+          {activeTab === "installation" && <InstallationForm />}
         </div>
 
         <div className="border-l pl-4">
@@ -219,30 +290,82 @@ export default function POSPage() {
               onChange={setSelectedCustomer}
             ></CustomerSelect>
           </div>
-          <Cart
-            items={cartItems}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemoveItem={handleRemoveItem}
-            onEmptyCart={handleEmptyCart}
-            onPay={() => {
-              console.log(cartItems);
-              setShowBill(true);
-            }}
-          />
+          <div>
+            <Cart
+              items={cartItems}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveItem}
+              onEmptyCart={handleEmptyCart}
+              onPay={() => {
+                console.log(cartItems);
+                setShowBill(true);
+              }}
+            />
+            <div className="border-t p-4 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Sub-Total:</span>
+                  <span>NRP {subTotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Discount:</span>
+                  <div>
+                    <input
+                      min={0}
+                      value={discount}
+                      onChange={(e) => setDiscount(parseInt(e.target.value))}
+                      type="number"
+                      className="border px-2 w-16 rounded"
+                    />{" "}
+                    %
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax (13%):</span>
+                  <span>NRP {tax.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span>Total:</span>
+                  <span>NRP {total.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 border-t pt-4 justify-end">
+                {/* <Button variant="destructive" className="w-32" onClick={onEmptyCart}>
+            Empty Cart
+          </Button> */}
+                <Button className="w-32" onClick={() => setShowBill(true)}>
+                  Pay Now
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {/* {showBill && (
-        <Bill
+      {showBill && (
+        <Modal
           isOpen={true}
           onClose={() => {
             setShowBill(false);
           }}
-          VATAmount={0.13}
-          customerId={selectedCustomer}
-          discount={0}
-          items={cartItems}
-        />
-      )} */}
+          title="Bill Detail"
+          size="4xl"
+        >
+          <Bill
+            subTotal={subTotal}
+            discount={discount}
+            discountAmount={discountAmount}
+            TAX_RATE={TAX_RATE}
+            customerId={selectedCustomer}
+            items={cartItems}
+            tax={tax}
+            total={total}
+          />
+          <div className="mt-4 flex justify-end">
+            <Button onClick={submitOrder}>Place Order</Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
