@@ -70,13 +70,23 @@ const menuItems = [
         title: "Products Installation",
       },
       {
-        name: "Service",
+        name: "Services",
         link: "/admin/service",
         title: "Service Management"
       },
       {
-        name: "Service Order",
+        name: "Service Orders",
         link: "/admin/service_order",
+        title: "Service Management"
+      },
+      {
+        name: "Service Provided",
+        link: "/admin/service_provided",
+        title: "Service Management"
+      },
+      {
+        name: "Service Billings",
+        link: "/admin/service_billing",
         title: "Service Management"
       },
     ],
@@ -141,7 +151,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute  p-4 border-r border-gray-200 left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-white duration-300 ease-linear dark:bg-boxdark dark:bg-black lg:static lg:translate-x-0 ${
+      className={`absolute  p-4 border-r border-gray-200 left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-background_light duration-300 ease-linear dark:bg-boxdark dark:bg-black lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >

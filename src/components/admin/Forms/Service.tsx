@@ -26,7 +26,7 @@ interface ServiceFormData {
     serviceCharge: number;
     additionalNotes: string;
     availability: string;
-    serviceProvided: string[];
+    // serviceProvided: string[];
 }
 
 interface ServiceProps {
@@ -52,7 +52,7 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
     serviceCharge: 0,
     additionalNotes: '',
     availability: '',
-    serviceProvided: [],
+    // serviceProvided: [],
     ...initialData,
   };
 
@@ -66,7 +66,7 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
   const [selectedType, setSelectedType] = useState(initialData?.serviceType || "");
   const [selectedProducts, setSelectedProducts] = useState<string[]>(
     (initialData?.products || []).map((product) =>
-      typeof product === "object" ? product._id || "" : product || ""
+      typeof product === "object" && "_id" in product ? product._id : product
     )
   );
   const [selectedParts, setSelectedParts] = useState<string[]>(
@@ -86,7 +86,7 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
       setSelectedType(initialData.serviceType || "");
       setSelectedProducts(
       (initialData.products || []).map((product) =>
-        typeof product === "object" ? product._id || "" : product || ""
+        typeof product === "object" && "_id" in product ? product._id : product
       )
     );
     setSelectedParts(
@@ -133,8 +133,18 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
 
 
   const handleFormSubmit = async (data: ServiceFormData) => {
+    const transformedData = {
+        ...data,
+        products: data.products.map((product) =>
+        typeof product === "object" && "_id" in product ? product._id : product
+        ),
+        parts: data.parts.map((part) =>
+        typeof part === "object" && "_id" in part ? part._id : part
+        ),
+    };
+    
     const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
+    Object.entries(transformedData).forEach(([key, value]) => {
         formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value.toString());
     });
     onSubmit(formData);

@@ -11,7 +11,7 @@ const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const isPosRoute = location.pathname === "/admin/pos";
 
   return (
-    <div className="dark:bg-boxdark-2 dark:text-bodydark">
+    <div className="dark:bg-boxdark-2 bg-background_light dark:text-bodydark">
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex h-screen overflow-hidden">
         {/* <!-- ===== Sidebar Start ===== --> */}

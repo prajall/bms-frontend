@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import ServiceSelect from '@/components/formElements/ServiceSelect';
-import CustomerSelect from '@/components/formElements/CustomerSelect';
+import SelectCustomer from '@/components/formElements/SelectCustomer';
+
 import { MultiServiceProvided } from '@/components/formElements/SelectServiceProvide';
 
 interface ServiceReference {
@@ -20,7 +21,7 @@ interface ServiceOrderFormData {
     date: string;
     nextServiceDate: string;
     serviceCharge: number;
-    serviceProvided: string[];
+    serviceProvided: (string | ServiceReference)[];
 }
 
 interface ServiceOrderProps {
@@ -53,7 +54,11 @@ const ServiceOrder: React.FC<ServiceOrderProps> = ({ initialData, onSubmit }) =>
     const [selectedCustomer, setSelectedCustomer] = useState<string>(
         typeof initialData?.customerId === 'object' ? initialData?.customerId?._id || '' : initialData?.customerId || ''
     );
-    const [selectedServiceProvided, setSelectedServiceProvided] = useState<string[]>(initialData?.serviceProvided || []);
+    const [selectedServiceProvided, setSelectedServiceProvided] = useState<string[]>(
+        (initialData?.serviceProvided || []).map((item) =>
+        typeof item === "object" ? item._id || "" : item || ""
+        )
+    );
 
     // Sync form state and controlled states when `initialData` changes
     useEffect(() => {
@@ -69,7 +74,11 @@ const ServiceOrder: React.FC<ServiceOrderProps> = ({ initialData, onSubmit }) =>
 
             setSelectedService(serviceId);
             setSelectedCustomer(customerId);
-            setSelectedServiceProvided(initialData.serviceProvided || []);
+            setSelectedServiceProvided(
+            (initialData.serviceProvided || []).map((item) =>
+                typeof item === "object" ? item._id || "" : item || ""
+            )
+            );
         }
     }, [initialData, setValue]);
 
@@ -115,7 +124,7 @@ const ServiceOrder: React.FC<ServiceOrderProps> = ({ initialData, onSubmit }) =>
                         {/* Customer Select */}
                         <div className="mb-4">
                             <Label htmlFor="customerId">Customer</Label>
-                            <CustomerSelect
+                            <SelectCustomer
                                 selectedCustomer={selectedCustomer}
                                 onChange={handleCustomerChange}
                                 showAddCustomerButton={true}

@@ -8,11 +8,12 @@ import {
   EditIcon,
   ShowIcon,
 } from "@/components/ui/buttons/IconBtn";
-import AddServiceOrder from "./create";
+import AddServiceOrder from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useServiceOrders } from "@/hooks/useServiceOrder";
 
 type ServiceOrder = {
     id: string;
@@ -24,35 +25,23 @@ type ServiceOrder = {
 };
 
 const ServiceOrderIndex = () => {
-  const [serviceOrderData, setServiceOrderData] = useState<ServiceOrder[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchServiceOrderData = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/service-order`
-      );
-      if (response.status === 200 && response.data.success) {
-        const formattedData = response.data.data.map((item: any) => ({
-            id: item._id,
-            service: item.serviceId?.title || "",
-            customer: item.customerId?.name || "",
-            serviceCharge: item.serviceCharge
-                ? item.serviceCharge.toString()
-                : "0",
-            serviceDate: item.date ? new Date(item.date).toISOString().split('T')[0] : "",
-            nextDate: item.nextServiceDate ? new Date(item.nextServiceDate).toISOString().split('T')[0] : "",
-        }));
-        setServiceOrderData(formattedData);
-        setErrorMessage("");
-      } else {
-        setErrorMessage(response.data.message || "Failed to fetch service order.");
-      }
-    } catch (error) {
-      console.error("Error fetching service order data:", error);
-    }
-  };
+  const { serviceOrders, loading, refetch } = useServiceOrders();
+
+  const serviceOrderData = serviceOrders.map((item: any) => ({
+    id: item._id,
+    service: item.serviceId?.title || "",
+    customer: item.customerId?.name || "",
+    serviceCharge: item.serviceCharge ? item.serviceCharge.toString() : "0",
+    serviceDate: item.date
+      ? new Date(item.date).toISOString().split("T")[0]
+      : "",
+    nextDate: item.nextServiceDate
+      ? new Date(item.nextServiceDate).toISOString().split("T")[0]
+      : "",
+  }));
 
   const handleAction = async (action: string, id: string) => {
     if (action === "delete") {
@@ -69,7 +58,7 @@ const ServiceOrderIndex = () => {
           toast(<SuccessToast message={response.data.message} />, {
             autoClose: 5000,
           });
-          fetchServiceOrderData(); // Refresh data
+          refetch(); // Refresh data
         } else {
           toast(
             <ErrorToast
@@ -108,6 +97,12 @@ const ServiceOrderIndex = () => {
         width: "60px",
         },
         {
+        name: "Order ID",
+        selector: (row: ServiceOrder) => row.id,
+            sortable: true,
+            wrap: true
+        },
+        {
         name: "Service",
         selector: (row: ServiceOrder) => row.service,
             sortable: true,
@@ -130,9 +125,9 @@ const ServiceOrderIndex = () => {
         },
   ];
 
-  useEffect(() => {
-    fetchServiceOrderData();
-  }, []);
+  // useEffect(() => {
+  //   fetchServiceOrderData();
+  // }, []);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -178,7 +173,7 @@ const ServiceOrderIndex = () => {
         <AddServiceOrder
           onSuccess={() => {
             handleCloseModal();
-            fetchServiceOrderData();
+            refetch();;
           }}
         />
       </Modal>

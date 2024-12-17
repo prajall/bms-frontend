@@ -51,7 +51,7 @@ const TableLayout = <T extends object>({
         backgroundColor: "#f4f4f5",
         color: "black",
         fontWeight: "600",
-        borderRadius: "10px 10px 0px 0px",
+        borderRadius: "10px 10px 10px 10px",
       },
     },
     headCells: {
@@ -63,12 +63,13 @@ const TableLayout = <T extends object>({
     cells: {
       style: {
         fontSize: "0.875rem",
+        padding:"10px 10px 10px 10px"
       },
     },
   };
 
   return (
-    <div className="">
+    <div className="bg-white m-2 shadow-lg rounded-md">
       {/* DataTable Component */}
       <DataTable
         columns={columns}

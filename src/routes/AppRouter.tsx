@@ -31,6 +31,7 @@ import ProductCategoryIndex from "@/pages/admin/productCategory/Index";
 import EditCategory from "@/pages/admin/productCategory/Edit";
 
 import PartIndex from "@/pages/admin/parts/Index";
+import EditPart from "@/pages/admin/parts/Edit";
 
 import POSIndex from "@/pages/admin/POS/Index";
 
@@ -40,8 +41,14 @@ import ServiceIndex from "@/pages/admin/services/service/Index";
 import EditService from "@/pages/admin/services/service/Edit";
 import TitleUpdater from "@/components/admin/Header/HeaderTitle";
 
-import ServiceOrderIndex from "@/pages/admin/services/service-order";
-import EditServiceOrder from "@/pages/admin/services/service-order/edit";
+import ServiceOrderIndex from "@/pages/admin/services/service-order/Index";
+import EditServiceOrder from "@/pages/admin/services/service-order/Edit";
+
+import ServiceBillingIndex from "@/pages/admin/services/service-billing/Index";
+import EditServiceBilling from "@/pages/admin/services/service-billing/Edit";
+
+import ServiceProvidedIndex from "@/pages/admin/services/service-provided/Index";
+import EditServiceProvided from "@/pages/admin/services/service-provided/Edit";
 
 const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const isAuthenticated = useSelector(
@@ -225,6 +232,18 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/admin/part/edit/:id"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <EditPart />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
         {/* POS */}
         <Route
           path="/admin/pos"
@@ -290,6 +309,52 @@ const AppRouter: React.FC = () => {
             <PrivateRoute>
               <AdminLayout>
                 <EditServiceOrder />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* service billing */}
+        <Route
+          path="/admin/service_billing"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <ServiceBillingIndex />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/service_billing/edit/:id"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <EditServiceBilling />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* service provided */}
+        <Route
+          path="/admin/service_provided"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <ServiceProvidedIndex />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/service_provided/edit/:id"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <EditServiceProvided />
               </AdminLayout>
             </PrivateRoute>
           }

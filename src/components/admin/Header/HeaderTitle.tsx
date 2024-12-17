@@ -17,7 +17,9 @@ const TitleUpdater: React.FC = () => {
     products: "Items - Products",
     products_installation: "Installation Service",
     service: "Services",
-    service_order: "Service Order"
+    service_order: "Service Order",
+    service_billing: "Service Billing",
+    service_provided: "Service Provided",
   };
 
   useEffect(() => {
