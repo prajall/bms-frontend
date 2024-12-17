@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TableLayout from "@/components/admin/TableLayout";
 import Bill from "./Bill";
+import { useState } from "react";
 
 export interface Item {
   _id: string;
@@ -33,15 +34,6 @@ const Cart = ({
   onEmptyCart,
   onPay,
 }: CartProps) => {
-  const TAX_RATE = 0.13;
-
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.sellingPrice * item.quantity,
-    0
-  );
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + tax;
-
   const columns = [
     {
       name: "Name",
@@ -68,17 +60,19 @@ const Cart = ({
       cell: (row: CartItem) => (
         <div className="flex items-center gap-2">
           <Button
+            className="p-2 h-6"
             variant="outline"
-            size="sm"
+            size="xs"
             onClick={() => onUpdateQuantity(row._id, row.quantity - 1)}
             disabled={row.quantity <= 1}
           >
             -
           </Button>
-          <span className="w-6 text-center">{row.quantity}</span>
+          <span className="w-5 text-center">{row.quantity}</span>
           <Button
+            className="p-2 h-6"
             variant="outline"
-            size="sm"
+            size="xs"
             onClick={() => onUpdateQuantity(row._id, row.quantity + 1)}
           >
             +
@@ -118,7 +112,7 @@ const Cart = ({
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col min-h-[50vh]">
       <div className="flex-1 overflow-auto">
         <TableLayout
           columns={columns}
@@ -126,32 +120,6 @@ const Cart = ({
           onAction={() => {}}
           showSearch={false}
         />
-      </div>
-
-      <div className="border-t p-4 space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>Sub-Total:</span>
-            <span>NRP {subtotal.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Tax (13%):</span>
-            <span>NRP {tax.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between font-bold">
-            <span>Total:</span>
-            <span>NRP {total.toLocaleString()}</span>
-          </div>
-        </div>
-
-        <div className="flex gap-2 border-t pt-4 justify-end">
-          {/* <Button variant="destructive" className="w-32" onClick={onEmptyCart}>
-            Empty Cart
-          </Button> */}
-          <Button className="w-32" onClick={onPay}>
-            Pay Now
-          </Button>
-        </div>
       </div>
     </div>
   );
