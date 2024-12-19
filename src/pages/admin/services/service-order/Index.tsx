@@ -32,8 +32,8 @@ const ServiceOrderIndex = () => {
 
   const serviceOrderData = serviceOrders.map((item: any) => ({
     id: item._id,
-    service: item.serviceId?.title || "",
-    customer: item.customerId?.name || "",
+    service: item.service?.title || "",
+    customer: item.customer?.name || "",
     serviceCharge: item.serviceCharge ? item.serviceCharge.toString() : "0",
     serviceDate: item.date
       ? new Date(item.date).toISOString().split("T")[0]

@@ -50,6 +50,9 @@ import EditServiceBilling from "@/pages/admin/services/service-billing/Edit";
 import ServiceProvidedIndex from "@/pages/admin/services/service-provided/Index";
 import EditServiceProvided from "@/pages/admin/services/service-provided/Edit";
 
+import SystemConfigurationPage from "@/pages/admin/configs/System";
+import BusinessConfigurationPage from "@/pages/admin/configs/Business";
+
 const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
@@ -355,6 +358,29 @@ const AppRouter: React.FC = () => {
             <PrivateRoute>
               <AdminLayout>
                 <EditServiceProvided />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* config router */}
+        <Route
+          path="/admin/system_config"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <SystemConfigurationPage />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/business_config"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <BusinessConfigurationPage />
               </AdminLayout>
             </PrivateRoute>
           }

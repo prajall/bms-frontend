@@ -18,6 +18,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import Logo from "../../../assets/images/logo.png";
 import SidebarLinkGroup from "./SidebarLinkGroup";
+import { useBusinessConfig } from "@/hooks/useBusinessConfig";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -98,12 +99,29 @@ const menuItems = [
   { name: "Reports", icon: BarChart2, link: "/reports" },
   { name: "Templates", icon: FileIcon, link: "/templates" },
   { name: "Brand", icon: GitBranch, link: "/brand" },
-  { name: "Configuration", icon: Settings, link: "/configuration" },
+  {
+    name: "Configuration",
+    icon: Settings,
+    link: "#",
+    children: [
+      {
+        name: "Business",
+        link: "/admin/business_config",
+        title: "Configuration",
+      },
+      {
+        name: "System",
+        link: "/admin/system_config",
+        title: "Configuration",
+      },
+    ],
+  },
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const location = useLocation();
   const { pathname } = location;
+  const { businessConfig, loading, error } = useBusinessConfig();
 
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
@@ -148,6 +166,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     }
   }, [sidebarExpanded]);
 
+  const businessLogo = businessConfig?.logo || "";
+
   return (
     <aside
       ref={sidebar}
@@ -157,8 +177,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between lg:flex-col lg:items-center lg:gap-4">
-        <NavLink to="/dashboard" className="">
-          <img src={Logo} alt="Logo" className="mx-auto" />
+        <NavLink to="/admin" className="">
+          {!loading && businessLogo ? (
+            <img src={businessLogo} alt="Logo" className="mx-auto w-22 h-auto" />
+          ) : (
+            <img src={Logo} alt="Logo" className="mx-auto w-20 h-auto" />
+          )}
         </NavLink>
         <button
           ref={trigger}

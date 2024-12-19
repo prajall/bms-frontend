@@ -4,7 +4,7 @@ import axios from 'axios';
 export interface ServiceOrder {
     _id: string;
     title: string;
-     customerId?: {
+     customer?: {
         _id: string;
         name: string;
      };

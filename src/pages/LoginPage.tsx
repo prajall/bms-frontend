@@ -9,6 +9,10 @@ import { toast } from "react-toastify";
 import { authenticate } from "../features/auth/authSlice";
 import { useTheme } from "@/utils/themes.utils";
 
+// import Logo from "../assets/images/logo.png"
+// import rb8171 from "../assets/images/rb-817-1.png";
+// import rb47921 from "../assets/images/rb-4792-1.png";
+
 const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { theme } = useTheme();
@@ -40,7 +44,7 @@ const LoginPage = () => {
       if (response.status >= 200) {
         dispatch(authenticate(response.data.user));
         toast.success("Logged in successfully");
-        navigate("/dashboard");
+        navigate("/admin");
       } else {
         throw new Error("Login Error");
       }
@@ -131,12 +135,6 @@ const LoginPage = () => {
             {isSubmitting ? "Logging in" : "Login"}
           </button>
         </form>
-        <p className="text-xs py-2 text-center">
-          New to QuizPro?{" "}
-          <Link to="/register" className="text-primary hover:underline">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );

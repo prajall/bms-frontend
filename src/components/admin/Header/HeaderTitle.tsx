@@ -20,6 +20,8 @@ const TitleUpdater: React.FC = () => {
     service_order: "Service Order",
     service_billing: "Service Billing",
     service_provided: "Service Provided",
+    business_config: "Business Configuration",
+    system_config: "System Configuration",
   };
 
   useEffect(() => {

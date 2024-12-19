@@ -11,8 +11,8 @@ import { ProductSelect } from '@/components/formElements/ProductSelect';
 
 // Define the type for the form data
 interface ProductInstallationFormData {
-  productId: string;
-  customerId: string;
+  product: string;
+  customer: string;
   installationDate: Date;
   status: string;
   address: string;
@@ -31,8 +31,8 @@ const ProductInstallation: React.FC<ProductInstallationProps> = ({ initialData, 
   const [selectedStatus, setSelectedStatus] = useState(initialData?.status || "");
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const defaultValues: ProductInstallationFormData = {
-    productId: "",
-    customerId: "",
+    product: "",
+    customer: "",
     installationDate: new Date(),
     status: "",
     address: "",
@@ -77,22 +77,22 @@ const ProductInstallation: React.FC<ProductInstallationProps> = ({ initialData, 
             {/* Product Select */}
             <div className="mb-4">
               <ProductSelect
-                selectedProduct={defaultValues.productId}
-                onChange={(value) => setValue("productId", value)}
+                selectedProduct={defaultValues.product}
+                onChange={(value) => setValue("product", value)}
                 showAddProductButton={true}
               />
-              {errors.productId && <p className="text-red-500 text-xs mt-1">{errors.productId.message}</p>}
+              {errors.product && <p className="text-red-500 text-xs mt-1">{errors.product.message}</p>}
             </div>
 
             {/* Customer Select */}
             <div className="mb-4">
               <CustomerSelect
-                selectedCustomer={defaultValues.customerId}
-                onChange={(value) => setValue("customerId", value)}
+                selectedCustomer={defaultValues.customer}
+                onChange={(value) => setValue("customer", value)}
                 loadingText="Fetching customers..."
                 showAddCustomerButton={true}
               />
-              {errors.customerId && <p className="text-red-500 text-xs mt-1">{errors.customerId.message}</p>}
+              {errors.customer && <p className="text-red-500 text-xs mt-1">{errors.customer.message}</p>}
             </div>
 
             {/* Installation Date */}

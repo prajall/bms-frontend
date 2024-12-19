@@ -18,8 +18,8 @@ interface ServiceReference {
 
 // Define the type for the form data
 interface ServiceProvidedFormData {
-    serviceId: ServiceReference | string; 
-    serviceOrderId: ServiceReference | string; 
+    service: ServiceReference | string; 
+    serviceOrder: ServiceReference | string; 
     title: string;
     date: string;
     serviceCharge: number;
@@ -41,8 +41,8 @@ const formatDateToYYYYMMDD = (date: string | Date) => {
 
 const ServiceProvided: React.FC<ServiceProvidedProps> = ({ initialData, onSubmit }) => {
     const defaultValues: ServiceProvidedFormData = {
-        serviceId: '',
-        serviceOrderId: '',
+        service: '',
+        serviceOrder: '',
         title: '',
         date: formatDateToYYYYMMDD(new Date()),
         serviceCharge: 0,
@@ -61,11 +61,11 @@ const ServiceProvided: React.FC<ServiceProvidedProps> = ({ initialData, onSubmit
   } = useForm<ServiceProvidedFormData>({ defaultValues });
 
   const [selectedService, setSelectedService] = useState<string>(
-        typeof initialData?.serviceId === 'object' ? initialData?.serviceId?._id || '' : initialData?.serviceId || ''
+        typeof initialData?.service === 'object' ? initialData?.service?._id || '' : initialData?.service || ''
   );
     
     const [selectedServiceOrder, setSelectedServiceOrder] = useState<string>(
-        typeof initialData?.serviceOrderId === 'object' ? initialData?.serviceOrderId?._id || '' : initialData?.serviceOrderId || ''
+        typeof initialData?.serviceOrder === 'object' ? initialData?.serviceOrder?._id || '' : initialData?.serviceOrder || ''
     );
     
   const [selectedProducts, setSelectedProducts] = useState<string[]>(
@@ -86,11 +86,11 @@ const ServiceProvided: React.FC<ServiceProvidedProps> = ({ initialData, onSubmit
       Object.keys(initialData).forEach((key) => {
         setValue(key as keyof ServiceProvidedFormData, (initialData as any)[key]);
       });
-    const serviceId = typeof initialData.serviceId === 'object' ? initialData.serviceId._id : initialData.serviceId || '';
-        setValue('serviceId', serviceId);
+    const service = typeof initialData.service === 'object' ? initialData.service._id : initialData.service || '';
+        setValue('service', service);
 
-        const serviceOrder = typeof initialData?.serviceOrderId === 'object' ? initialData?.serviceOrderId?._id || '' : initialData?.serviceOrderId || ''
-            setValue('serviceOrderId', serviceOrder);
+        const serviceOrder = typeof initialData?.serviceOrder === 'object' ? initialData?.serviceOrder?._id || '' : initialData?.serviceOrder || ''
+            setValue('serviceOrder', serviceOrder);
       setSelectedProducts(
       (initialData.products || []).map((product) =>
         typeof product === "object" && "_id" in product ? product._id : product
@@ -102,7 +102,7 @@ const ServiceProvided: React.FC<ServiceProvidedProps> = ({ initialData, onSubmit
       )
     );
         setValue('date', formatDateToYYYYMMDD(initialData.date || new Date()));
-        setSelectedService(serviceId);
+        setSelectedService(service);
         setSelectedServiceOrder(serviceOrder);
       setWorkDetailContent(initialData.workDetail || '');
       setAddNoteContent(initialData.additionalNotes || '');
@@ -111,12 +111,12 @@ const ServiceProvided: React.FC<ServiceProvidedProps> = ({ initialData, onSubmit
     
     const handleServiceChange = (value: string) => {
         setSelectedService(value);
-        setValue("serviceId", value);
+        setValue("service", value);
     };
 
     const handleServiceOrderChange = (value: string) => {
         setSelectedServiceOrder(value);
-        setValue("serviceOrderId", value);
+        setValue("serviceOrder", value);
     };
 
   const handleProductsChange = (values: string[]) => {
@@ -164,24 +164,24 @@ const ServiceProvided: React.FC<ServiceProvidedProps> = ({ initialData, onSubmit
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
                 {/* Service Select */}
                 <div className="mb-4">
-                    <Label htmlFor="serviceId">Service</Label>
+                    <Label htmlFor="service">Service</Label>
                     <ServiceSelect
                         selectedService={selectedService}
                         onChange={handleServiceChange}
                         showAddServiceButton={true}
                     />
-                    {errors.serviceId && <p className="text-red-500 text-xs mt-1">{errors.serviceId.message}</p>}
+                    {errors.service && <p className="text-red-500 text-xs mt-1">{errors.service.message}</p>}
                     </div>
                     
                     {/* Service Select */}
                 <div className="mb-4">
-                    <Label htmlFor="serviceOrderId">Service Order</Label>
+                    <Label htmlFor="serviceOrder">Service Order</Label>
                     <ServiceOrderSelect
                         selectedServiceOrder={selectedServiceOrder}
                         onChange={handleServiceOrderChange}
                         showAddServiceOrderButton={false}
                     />
-                    {errors.serviceOrderId && <p className="text-red-500 text-xs mt-1">{errors.serviceOrderId.message}</p>}
+                    {errors.serviceOrder && <p className="text-red-500 text-xs mt-1">{errors.serviceOrder.message}</p>}
                 </div>
             
                 {/* Name */}

@@ -83,14 +83,14 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
 
     useEffect(() => {
         if (fetchedServiceOrder && !loading) {
-            setValue("customer", fetchedServiceOrder.customerId?._id || '');
+            setValue("customer", fetchedServiceOrder.customer?._id || '');
             setValue("previousDue",  fetchedServiceOrder.previousDue || 0);
             const totalAmount = 
             (fetchedServiceOrder.serviceCharge || 0) + 
             (fetchedServiceOrder.previousDue || 0);
 
         setValue("totalAmount", totalAmount);
-            setSelectedCustomer(fetchedServiceOrder.customerId?._id || '');
+            setSelectedCustomer(fetchedServiceOrder.customer?._id || '');
         }
     }, [fetchedServiceOrder, loading, setValue]);
 
@@ -119,7 +119,7 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
                         {/* Service Select */}
                         <div className="mb-4">
-                            <Label htmlFor="serviceId">Service Order</Label>
+                            <Label htmlFor="service">Service Order</Label>
                             <ServiceOrderSelect
                                 selectedServiceOrder={selectedServiceOrder}
                                 onChange={handleServiceOrderChange}
@@ -130,7 +130,7 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
 
                         {/* Customer Select */}
                         <div className="mb-4">
-                            <Label htmlFor="customerId">Customer</Label>
+                            <Label htmlFor="customer">Customer</Label>
                             <SelectCustomer
                                 selectedCustomer={selectedCustomer}
                                 onChange={handleCustomerChange}

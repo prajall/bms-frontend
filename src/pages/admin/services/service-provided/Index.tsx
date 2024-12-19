@@ -41,8 +41,8 @@ const ServiceProvidedIndex = () => {
         const formattedData = response.data.data.map((item: any) => ({
             id: item._id,
             title: item.title || "",
-            service: item.serviceId?.title || "",
-            serviceOrder: item.serviceOrderId?._id || '',
+            service: item.service?.title || "",
+            serviceOrder: item.serviceOrder?._id || '',
             date: item.date
                 ? new Date(item.date).toISOString().split("T")[0]
                 : "",

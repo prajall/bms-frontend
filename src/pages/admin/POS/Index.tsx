@@ -161,7 +161,7 @@ export default function POSPage() {
     const data = {
       products: products.map((product) => {
         return {
-          productId: product._id,
+          product: product._id,
           quantity: product.quantity,
           price: product.sellingPrice,
         };
