@@ -1,6 +1,6 @@
 import React from "react";
 import AddButton from "../ui/buttons/AddButton";
-import { useServiceOrders } from "@/hooks/useServiceOrder";
+import { useServiceOrders } from "@/hooks/useService";
 import Select from "react-select";
 
 interface ServiceOrderSelectProps {
@@ -17,15 +17,10 @@ const ServiceOrderSelect: React.FC<ServiceOrderSelectProps> = ({
   showAddServiceOrderButton = false,
 }) => {
   const { serviceOrders, loading, refetch } = useServiceOrders();
-
-  // Debug data
-  console.log("Service Orders:", serviceOrders);
-
   const options = serviceOrders.map((order) => ({
     value: order._id,
-    label: order.title || order._id, // Use `title` if available, fallback to `_id`
+    label: order.orderId || order._id,
   }));
-  console.log("Select Options:", options);
 
   const handleAddServiceOrder = () => {
     console.log("Navigate to the add service order page or show a modal.");

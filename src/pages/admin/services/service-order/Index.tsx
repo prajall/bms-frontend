@@ -7,41 +7,82 @@ import {
   DeleteIcon,
   EditIcon,
   ShowIcon,
+  ReOrderIcon,
+  BillingIcon,
+  RecurringIcon
 } from "@/components/ui/buttons/IconBtn";
 import AddServiceOrder from "./Create";
+import RecurringOrder from "./Recurring";
+import ServiceBilling from "./Billing";
+import ReOrder from "./Reorder";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useServiceOrders } from "@/hooks/useServiceOrder";
 
 type ServiceOrder = {
-    id: string;
-    service: string;
-    customer: string;
-    serviceCharge: string;
-    serviceDate: Date;
-    nextDate: Date;
+  id: string;
+  orderId: string;
+  service: string;
+  customer: string;
+  serviceCharge: string;
+  serviceDate: Date;
+  isRecurring: boolean;
+  nextDate: Date;
+  status: string;
+  paymentStatus: string;
 };
 
 const ServiceOrderIndex = () => {
+  const [serviceOrders, setServiceOrder] = useState<ServiceOrder[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { serviceOrders, loading, refetch } = useServiceOrders();
+  const [isReOrderModalOpen, setIsReOrderModalOpen] = useState(false);
+  const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
+  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const serviceOrderData = serviceOrders.map((item: any) => ({
-    id: item._id,
-    service: item.service?.title || "",
-    customer: item.customer?.name || "",
-    serviceCharge: item.serviceCharge ? item.serviceCharge.toString() : "0",
-    serviceDate: item.date
-      ? new Date(item.date).toISOString().split("T")[0]
-      : "",
-    nextDate: item.nextServiceDate
-      ? new Date(item.nextServiceDate).toISOString().split("T")[0]
-      : "",
-  }));
+  const fetchServiceOrder = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/service-order`,
+          { params: { page, limit, sortField, sortOrder, search }, withCredentials: true }
+      );
+      if (response.status === 200 && response.data.success) {
+        const formattedData = response.data.data.serviceOrders.map((item: any) => ({
+          id: item._id,
+          orderId: item.orderId,
+          service: item.service?.title || "",
+          customer: item.customer?.name || "",
+          serviceCharge: item.serviceCharge ? item.serviceCharge.toString() : "0",
+          serviceDate: item.date
+            ? new Date(item.date).toISOString().split("T")[0]
+            : "",
+          isRecurring: item.isRecurring,
+          nextDate: item.nextServiceDate
+            ? new Date(item.nextServiceDate).toISOString().split("T")[0]
+            : "",
+          status: item.status,
+          paymentStatus: item.paymentStatus,
+        }));
+        setServiceOrder(formattedData);
+        setTotalRows(response.data.data.totalOrders);
+        setErrorMessage("");
+      } else {
+        setErrorMessage(response.data.message || "Failed to fetch service.");
+      }
+    } catch (error) {
+      console.error("Error fetching service data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchServiceOrder();
+  }, [page, limit, sortField, sortOrder, search]);
 
   const handleAction = async (action: string, id: string) => {
     if (action === "delete") {
@@ -58,7 +99,7 @@ const ServiceOrderIndex = () => {
           toast(<SuccessToast message={response.data.message} />, {
             autoClose: 5000,
           });
-          refetch(); // Refresh data
+          fetchServiceOrder();
         } else {
           toast(
             <ErrorToast
@@ -88,6 +129,38 @@ const ServiceOrderIndex = () => {
     }
   };
 
+  // Open ReOrder Modal
+  const handleReOrder = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setIsReOrderModalOpen(true);
+  };
+
+  const handleRecurring = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setIsRecurringModalOpen(true);
+  };
+
+  // Close ReOrder Modal
+  const handleCloseReOrderModal = () => {
+    setIsReOrderModalOpen(false);
+    setSelectedOrderId(null);
+  };
+
+  const handleCloseRecurringModal = () => {
+    setIsRecurringModalOpen(false);
+    setSelectedOrderId(null);
+  };
+
+  const handleBilling = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setIsBillingModalOpen(true);
+  };
+
+  const handleCloseBillingModal = () => {
+    setIsBillingModalOpen(false);
+    setSelectedOrderId(null);
+  };
+
   const columns = [
         {
         name: "SN",
@@ -98,9 +171,10 @@ const ServiceOrderIndex = () => {
         },
         {
         name: "Order ID",
-        selector: (row: ServiceOrder) => row.id,
-            sortable: true,
-            wrap: true
+          selector: (row: ServiceOrder) => row.orderId,
+          sortable: true,
+          wrap: true,
+          width: "130px",
         },
         {
         name: "Service",
@@ -109,25 +183,89 @@ const ServiceOrderIndex = () => {
             wrap: true
         },
         { name: "Customer", selector: (row: ServiceOrder) => row.customer, wrap: true, sortable: true },
-        { name: "Charge", selector: (row: ServiceOrder) => row.serviceCharge },
-        { name: "Date", selector: (row: ServiceOrder) => row.serviceDate, sortable: true },
-        { name: "Next Date", selector: (row: ServiceOrder) => row.nextDate, sortable: true },
+        { name: "Charge", selector: (row: ServiceOrder) => row.serviceCharge, width: "130px" },
+        { name: "Date", selector: (row: ServiceOrder) => row.serviceDate, sortable: true, width: "130px" },
+        {
+          name: "Is Recurring",
+          selector: (row: ServiceOrder) => (
+            <span style={{ color: row.isRecurring ? "green" : "red" }}>
+              {row.isRecurring ? "✓" : "✗"}
+            </span>
+          ),
+          sortable: true, width: "110px"
+        },
+        { name: "Next Date", selector: (row: ServiceOrder) => row.nextDate, sortable: true, width: "130px" },
+        {
+        name: "Status",
+          sortable: true,
+          width: "110px",
+          selector: (row: ServiceOrder) => {
+              const getStatusColor = (status: string) => {
+                  switch (status.toLowerCase()) {
+                      case 'pending':
+                          return 'blue'; 
+                      case 'completed':
+                          return 'green';  
+                      case 'cancelled':
+                          return 'red';   
+                      case 'delayed':
+                          return 'orange'; 
+                      default:
+                          return 'gray'; 
+                  }
+              };
+
+              return (
+                  <div style={{ color: getStatusColor(row.status) }}>
+                      {row.status}
+                  </div>
+              );
+          }
+        },
+        {
+          name: "Payment Status",
+          sortable: true,
+          width: "150px",
+          selector: (row: ServiceOrder) => {
+            const getStatusColor = (paymentStatus: string) => {
+              switch (paymentStatus.toLowerCase()) {
+                case 'pending':
+                  return 'blue';
+                case 'paid':
+                  return 'green';
+                case 'partial':
+                  return 'orange';
+                default:
+                  return 'gray';
+              }
+            };
+
+            return (
+              <div style={{ color: getStatusColor(row.paymentStatus) }}>
+                {row.paymentStatus}
+              </div>
+            );
+          }
+        },
         {
         name: "Action",
         cell: (row: ServiceOrder) => (
-            <div className="inline-flex space-x-2">
+          <div className="inline-flex space-x-2">      
             <ShowIcon link={`/admin/service_order/show/${row.id}`} />
             <EditIcon link={`/admin/service_order/edit/${row.id}`} />
+            <ReOrderIcon  onClick={() => handleReOrder(row.id)}/>
             <DeleteIcon onClick={() => handleAction("delete", row.id)} />
-            </div>
+            {row.paymentStatus !== 'paid' ? (
+              <BillingIcon onClick={() => handleBilling(row.id)} />
+            ) : null}
+            {row.isRecurring && row.status.toLowerCase() !== "completed" ? (
+              <RecurringIcon onClick={() => handleRecurring(row.id)} />
+            ) : null}
+          </div>
         ),
         sortable: false,
         },
   ];
-
-  // useEffect(() => {
-  //   fetchServiceOrderData();
-  // }, []);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -139,16 +277,7 @@ const ServiceOrderIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex gap-2 justify-between mt-1">
-        <div className="relative w-full">
-          <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <Search className="h-5 w-5" />
-          </span>
-          <Input
-            className="w-full pl-10" // Adds padding to avoid overlapping with the icon
-            placeholder="Search ServiceOrders"
-          />
-        </div>
+      <div className="flex justify-end mt-1">
         <AddButton title="Add ServiceOrder" onClick={handleOpenModal} />
       </div>
       {errorMessage && (
@@ -159,7 +288,20 @@ const ServiceOrderIndex = () => {
       {/* Pass dynamic title */}
       <TableLayout
         columns={columns}
-        data={serviceOrderData}
+        data={serviceOrders}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
         onAction={handleAction}
       />
 
@@ -173,9 +315,63 @@ const ServiceOrderIndex = () => {
         <AddServiceOrder
           onSuccess={() => {
             handleCloseModal();
-            refetch();;
+            fetchServiceOrder();
           }}
         />
+      </Modal>
+
+      {/* ReOrder Modal */}
+      <Modal
+        isOpen={isReOrderModalOpen}
+        onClose={handleCloseReOrderModal}
+        title="ReOrder Service Order"
+        size="6xl"
+      >
+        {selectedOrderId && ( 
+          <ReOrder
+            orderId={selectedOrderId} 
+            onSuccess={() => {
+              handleCloseReOrderModal();
+              fetchServiceOrder(); 
+            }}
+          />
+        )}
+      </Modal>
+
+      {/* Recurring Modal */}
+      <Modal
+        isOpen={isRecurringModalOpen}
+        onClose={handleCloseRecurringModal}
+        title="Recurring Service Order"
+        size="6xl"
+      >
+        {selectedOrderId && ( 
+          <RecurringOrder
+            orderId={selectedOrderId} 
+            onSuccess={() => {
+              handleCloseRecurringModal();
+              fetchServiceOrder(); 
+            }}
+          />
+        )}
+      </Modal>
+
+       {/* Billing Modal */}
+      <Modal
+        isOpen={isBillingModalOpen}
+        onClose={handleCloseBillingModal}
+        title="Billing"
+        size="4xl"
+      >
+        {selectedOrderId && ( 
+          <ServiceBilling
+            orderId={selectedOrderId} 
+            onSuccess={() => {
+              handleCloseBillingModal();
+              fetchServiceOrder(); 
+            }}
+          />
+        )}
       </Modal>
     </div>
   );

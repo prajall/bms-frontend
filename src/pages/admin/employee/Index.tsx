@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
-import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import AddButton from "@/components/ui/buttons/AddButton";
 import Modal from "@/components/ui/Model";
-import { Button } from "@/components/ui/button";
 import {
   DeleteIcon,
   EditIcon,
@@ -28,13 +26,20 @@ type Employee = {
 
 const EmployeeIndex = () => {
   const [employeeData, setEmployeeData] = useState<Employee[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchEmployeeData = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/employee`
+        `${import.meta.env.VITE_API_URL}/employee`,
+            { params: { page, limit, sortField, sortOrder, search }, }
       );
       if (response.status === 200 && response.data.success) {
         const formattedData = response.data.data.employees.map(
@@ -48,6 +53,7 @@ const EmployeeIndex = () => {
           })
         );
         setEmployeeData(formattedData);
+        setTotalRows(response.data.data.totalEmployees);
         setErrorMessage("");
       } else {
         setErrorMessage(response.data.message || "Failed to fetch employees.");
@@ -56,6 +62,10 @@ const EmployeeIndex = () => {
       console.error("Error fetching employee data:", error);
     }
   };
+
+  useEffect(() => {
+    fetchEmployeeData();
+  }, [page, limit, sortField, sortOrder, search]);
 
   const handleAction = async (action: string, id: string) => {
     if (action === "delete") {
@@ -155,10 +165,6 @@ const EmployeeIndex = () => {
     },
   ];
 
-  useEffect(() => {
-    fetchEmployeeData();
-  }, []);
-
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -169,13 +175,7 @@ const EmployeeIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex gap-2 justify-between mt-1">
-        <div className="relative w-full">
-          <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <Search className="h-5 w-5" />
-          </span>
-          <Input className="w-full pl-10" placeholder="Search Employee" />
-        </div>
+      <div className="flex justify-end mt-1">
         <AddButton title="Add Employee" onClick={handleOpenModal} />
       </div>
       {errorMessage && (
@@ -187,6 +187,19 @@ const EmployeeIndex = () => {
       <TableLayout
         columns={columns}
         data={employeeData}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
         onAction={handleAction}
       />
 

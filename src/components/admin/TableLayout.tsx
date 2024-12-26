@@ -7,7 +7,6 @@ type Column<T> = {
   name: string;
   selector: (row: T) => string | number | boolean;
   sortable?: boolean;
-  // cell?: (row: T) => React.ReactNode; '
   cell?: (row: T, index?: number) => JSX.Element | string | number;
   width?: string;
   wrap?: boolean;
@@ -16,6 +15,16 @@ type Column<T> = {
 type TableLayoutProps<T> = {
   columns: any[];
   data: T[];
+  totalRows?: number;
+  page?: number;
+  limit?: number;
+  sortField?: string;
+  sortOrder?: string;
+  search?: string;
+  onSearch?: (search: string) => void;
+  onSort?: (field: string, order: string) => void;
+  onPageChange?: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
   onAction: (action: string, id: string) => void;
   showSearch?: boolean;
 };
@@ -23,68 +32,71 @@ type TableLayoutProps<T> = {
 const TableLayout = <T extends object>({
   columns,
   data,
-  onAction,
+  totalRows,
+  page,
+  limit,
+  sortField,
+  sortOrder,
+  search = "",
+  onSearch,
+  onSort,
+  onPageChange,
+  onLimitChange,
   showSearch = true,
 }: TableLayoutProps<T>) => {
-  // const [searchText, setSearchText] = useState<string>("");
+  const filteredData = useMemo(() => {
+    return data.filter((row) =>
+      columns.some((column) => {
+        if (typeof column.selector === "function") {
+          const value = column.selector(row);
+          return (
+            value !== undefined &&
+            value.toString().toLowerCase().includes(search.toLowerCase())
+          );
+        }
+        return false;
+      })
+    );
+  }, [data, columns, search]);
 
-  const filteredData = useMemo(
-    () =>
-      data.filter((row) =>
-        columns.some((column) => {
-          if (column.selector) {
-            const value = column.selector(row);
-            return (
-              value !== undefined
-              // value.toString().toLowerCase().includes(searchText.toLowerCase())
-            );
-          }
-          return false;
-        })
-      ),
-    [data, columns]
-  );
-
-  const customStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#f4f4f5",
-        color: "black",
-        fontWeight: "600",
-        borderRadius: "10px 10px 10px 10px",
-      },
-    },
-    headCells: {
-      style: {
-        fontWeight: "semi-bold",
-        fontSize: "1rem",
-      },
-    },
-    cells: {
-      style: {
-        fontSize: "0.875rem",
-        padding:"10px 10px 10px 10px"
-      },
-    },
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSearch && onSearch(event.target.value);
   };
 
   return (
     <div className="bg-white m-2 shadow-lg rounded-md">
-      {/* DataTable Component */}
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        pagination
-        paginationPerPage={20}
-        paginationRowsPerPageOptions={[20, 50, 100]}
-        sortIcon={<span>&#8597;</span>}
-        customStyles={customStyles}
-        noDataComponent={
-          <div className="py-4 text-gray-500">No records found.</div>
-        }
-      />
+      {showSearch && (
+        <div className="absolute top-0 left-0 p-2 pt-0 w-[450px] flex justify-between items-center">
+          <Input
+            className="w-[300px] md:w-[400px]"
+            placeholder="Search"
+            value={search}
+            onChange={handleSearchChange}
+          />
+        </div>
+      )}
+      <div className="mt-5">
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          pagination
+          paginationServer
+          paginationTotalRows={totalRows}
+          paginationPerPage={limit}
+          paginationDefaultPage={page}
+          onChangePage={onPageChange}
+          onChangeRowsPerPage={(newLimit) => onLimitChange && onLimitChange(newLimit)}
+          sortIcon={<span>&#8597;</span>}
+          customStyles={{
+            headRow: { style: { backgroundColor: "#f4f4f5", color: "black" } },
+          }}
+          noDataComponent={<div className="py-4 text-gray-500">No records found.</div>}
+        />
+      </div>
+      
     </div>
   );
 };
+
 
 export default TableLayout;

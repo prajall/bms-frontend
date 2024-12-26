@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
-import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
-import { Button } from "@/components/ui/button";
 import AddButton from "@/components/ui/buttons/AddButton";
 import {
   DeleteIcon,
@@ -13,7 +11,6 @@ import Modal from "@/components/ui/Model";
 import AddProduct from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
-import { Input } from "@/components/ui/input";
 
 type Product = {
   id: string;
@@ -29,14 +26,22 @@ type Product = {
 
 const ProductIndex = () => {
   const [productData, setproductData] = useState<Product[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
+
+
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchproductData = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/product`
-      );
+        `${import.meta.env.VITE_API_URL}/product`,
+        {params: { page, limit, sortField, sortOrder, search },});
       if (response.status === 200 && response.data.success) {
         const formattedData = response.data.data.products.map(
           (product: any) => ({
@@ -52,6 +57,7 @@ const ProductIndex = () => {
           })
         );
         setproductData(formattedData);
+        setTotalRows(response.data.data.totalProducts);
         setErrorMessage("");
       } else {
         setErrorMessage(response.data.message || "Failed to fetch product.");
@@ -60,6 +66,10 @@ const ProductIndex = () => {
       console.error("Error fetching product data:", error);
     }
   };
+
+  useEffect(() => {
+    fetchproductData();
+  }, [page, limit, sortField, sortOrder, search]);
 
   const handleAction = async (action: string, id: string) => {
     if (action === "delete") {
@@ -167,10 +177,6 @@ const ProductIndex = () => {
     },
   ];
 
-  useEffect(() => {
-    fetchproductData();
-  }, []);
-
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -182,8 +188,7 @@ const ProductIndex = () => {
   return (
     <div className="relative">
       {/* <Breadcrumb pageName="Product List" /> */}
-      <div className="flex gap-2 justify-between mt-1">
-        <Input className="w-full" placeholder="Search Product" />
+      <div className="flex justify-end mt-1">
         <AddButton title="Add Product" onClick={handleOpenModal} />
       </div>
 
@@ -197,6 +202,19 @@ const ProductIndex = () => {
       <TableLayout
         columns={columns}
         data={productData}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
         onAction={handleAction}
       />
 

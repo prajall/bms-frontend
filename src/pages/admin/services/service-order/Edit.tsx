@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 import { useNavigate } from "react-router-dom";
 
-
 const EditServiceOrder: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // Assume `id` comes from route params
     const [initialData, setInitialData] = useState(null);
@@ -21,9 +20,13 @@ const EditServiceOrder: React.FC = () => {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/service-order/${id}`, {
               withCredentials: true,
             });
-            setInitialData(response.data.data);
+            if (response.data.success) {
+                setInitialData(response.data.data.serviceOrder);
+            } else {
+                console.error("Failed to fetch service order data.")
+            }  
         } catch (error) {
-            toast.error("Failed to fetch service data.");
+            toast.error("Failed to fetch service order data.");
         } finally {
             setIsLoading(false);
         }
@@ -67,7 +70,7 @@ const EditServiceOrder: React.FC = () => {
     return (
         <div>
             <Breadcrumb pageName="Edit Service Order" />
-            <ServiceOrder initialData={initialData} onSubmit={handleEditServiceOrder} />
+            <ServiceOrder initialData={initialData} type={"edit"} onSubmit={handleEditServiceOrder} />
         </div>
     );
 };

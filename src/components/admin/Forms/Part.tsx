@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,8 @@ export interface PartFormData {
   costPrice: number;
   sellingPrice: number;
   discount: number;
-  images: (File | string)[];
+  // images: (File | string)[];
+  baseImage: string;
   stock: number;
   status: string;
   tags: string[];
@@ -32,7 +33,8 @@ interface PartFormProps {
 
 const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [images, setImages] = useState<(File | string)[]>(initialData?.images || []);
+  // const [images, setImages] = useState<(File | string)[]>(initialData?.images || []);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedStatus, setSelectedStatus] = useState(initialData?.status || "active");
   const [selectedBrand, setSelectedBrand] = useState(initialData?.brand || ""); 
   const [editorContent, setEditorContent] = React.useState('');
@@ -46,7 +48,8 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
     costPrice: 0,
     sellingPrice: 0,
     discount: 0,
-    images: [],
+    // images: [],
+    baseImage: '',
     stock: 0,
     status: "active",
     tags: [],
@@ -76,30 +79,33 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
     }
   }, [initialData]);
 
-  useEffect(() => {
-    if (initialData?.images) {
-      setImages(initialData.images);
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedImage(e.target.files[0]);
     }
-  }, [initialData]);
-
-  const addImage = () => {
-    setImages((prev) => [...prev, null!]);
   };
 
-  const handleImageUpload = (index: number, image: File) => {
-    setImages((prev) => {
-      const updatedImages = [...prev];
-      updatedImages[index] = image; 
-      return updatedImages;
-    });
-  };
+  // useEffect(() => {
+  //   if (initialData?.images) {
+  //     setImages(initialData.images);
+  //   }
+  // }, [initialData]);
 
-  const handleRemoveImage = (index: number) => {
-    // const updatedImages = [...images];
-    // updatedImages.splice(index, 1);
-    // setImages(updatedImages);
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
+  // const addImage = () => {
+  //   setImages((prev) => [...prev, null!]);
+  // };
+
+  // const handleImageUpload = (index: number, image: File) => {
+  //   setImages((prev) => {
+  //     const updatedImages = [...prev];
+  //     updatedImages[index] = image; 
+  //     return updatedImages;
+  //   });
+  // };
+
+  // const handleRemoveImage = (index: number) => {
+  //   setImages((prev) => prev.filter((_, i) => i !== index));
+  // };
 
   const handleBrandChange = (value: string) => {
     setSelectedBrand(value.toString());
@@ -135,25 +141,20 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
     const formData = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
-      if (key === "images") {
-        // images.forEach((image, index) => {
-        //   formData.append(`images[${index}]`, image);
-        // });
-        // images.forEach((img) => {
-        //   if (typeof img === "string") {
-        //     formData.append("images[]", img); // Existing image URL
-        //   } else {
-        //     formData.append("images[]", img); // New file
-        //   }
-        // });
-        images.forEach((img) => {
-          if (typeof img === "string") {
-            formData.append("images[]", img);
-          } else if (img instanceof File) {
-            formData.append("images[]", img.name); 
-          }
-        });
-      } else if (key === "tags") {
+      // if (key === "images") {
+      //   images.forEach((img) => {
+      //     if (typeof img === "string") {
+      //       formData.append("images[]", img);
+      //     } else if (img instanceof File) {
+      //       formData.append("images[]", img.name);
+      //     }
+      //   });
+      // }
+      if (key === "baseImage") {
+        if (selectedImage) {
+          formData.append("baseImage", selectedImage);
+        }
+      }else if (key === "tags") {
         tags.forEach((tag) => formData.append("tags[]", tag));
       } else if (Array.isArray(value)) {
         value.forEach((item) => formData.append(`${key}[]`, item));
@@ -161,6 +162,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
         formData.append(key, value as string | Blob);
       }
     });
+      
 
     onSubmit(formData);
     setIsSubmitting(false);
@@ -294,15 +296,20 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
               </Select>
             </div>
 
+            {/* Image */}
+              <div className='mb-4'>
+                <Label htmlFor="baseImage">Image</Label>
+                <Input id="baseImage" type="file" onChange={handleImageChange} />
+              </div>
+
             {/* Image Uploaders */}
-            <div className="mt-6 lg:col-span-2">
+            {/* <div className="mt-6 lg:col-span-2">
               <Label>Images</Label>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-4">
               {images.map((image, index) => (
                 <div key={index} className="relative">
                   {typeof image === "string" ? (
                     <div className="relative">
-                      {/* Image preview for existing images */}
                       <img src={image} alt={`Image ${index + 1}`} className="w-full h-auto rounded-lg" />
                       <button
                         type="button"
@@ -313,7 +320,6 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
                       </button>
                     </div>
                   ) : (
-                    // File input for new uploads
                     <ImageUploader
                       onImageUpload={(uploadedImage) => handleImageUpload(index, uploadedImage)}
                       onRemove={() => handleRemoveImage(index)}
@@ -329,7 +335,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
             >
               + Add Image
             </button>
-          </div>
+          </div> */}
 
           </div>
         </CardContent>

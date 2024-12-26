@@ -66,11 +66,6 @@ const menuItems = [
     link: "#",
     children: [
       {
-        name: "Installation",
-        link: "/admin/products_installation",
-        title: "Products Installation",
-      },
-      {
         name: "Services",
         link: "/admin/service",
         title: "Service Management"
@@ -80,22 +75,12 @@ const menuItems = [
         link: "/admin/service_order",
         title: "Service Management"
       },
-      {
-        name: "Service Provided",
-        link: "/admin/service_provided",
-        title: "Service Management"
-      },
-      {
-        name: "Service Billings",
-        link: "/admin/service_billing",
-        title: "Service Management"
-      },
     ],
   },
   { name: "Roles and Permission", icon: Shield, link: "/admin/roles" },
   { name: "Bookings", icon: Calendar, link: "/bookings" },
   { name: "Orders", icon: ShoppingCart, link: "/orders" },
-  { name: "Billings", icon: FileText, link: "/billings" },
+  { name: "Billings", icon: FileText, link: "/admin/billings" },
   { name: "Reports", icon: BarChart2, link: "/reports" },
   { name: "Templates", icon: FileIcon, link: "/templates" },
   { name: "Brand", icon: GitBranch, link: "/brand" },

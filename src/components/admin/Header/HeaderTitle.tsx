@@ -18,7 +18,7 @@ const TitleUpdater: React.FC = () => {
     products_installation: "Installation Service",
     service: "Services",
     service_order: "Service Order",
-    service_billing: "Service Billing",
+    billings: "Billings",
     service_provided: "Service Provided",
     business_config: "Business Configuration",
     system_config: "System Configuration",

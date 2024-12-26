@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
-import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import AddButton from "@/components/ui/buttons/AddButton";
 import Modal from "@/components/ui/Model";
 import { DeleteIcon, EditIcon, ShowIcon } from "@/components/ui/buttons/IconBtn";
@@ -134,8 +133,7 @@ const RoleIndex = () => {
     
   return (
     <div className="relative">
-      <Breadcrumb pageName="Role List" />
-      <div className="absolute top-10 right-0 p-4">
+      <div className="flex justify-end mt-1">
         <AddButton title="Add Role" onClick={handleOpenModal} />
       </div>
       {errorMessage && (

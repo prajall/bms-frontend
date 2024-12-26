@@ -44,8 +44,8 @@ import TitleUpdater from "@/components/admin/Header/HeaderTitle";
 import ServiceOrderIndex from "@/pages/admin/services/service-order/Index";
 import EditServiceOrder from "@/pages/admin/services/service-order/Edit";
 
-import ServiceBillingIndex from "@/pages/admin/services/service-billing/Index";
-import EditServiceBilling from "@/pages/admin/services/service-billing/Edit";
+import BillingIndex from "@/pages/admin/billing/Index";
+import EditBilling from "@/pages/admin/billing/Edit";
 
 import ServiceProvidedIndex from "@/pages/admin/services/service-provided/Index";
 import EditServiceProvided from "@/pages/admin/services/service-provided/Edit";
@@ -258,19 +258,7 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           }
         />
-
-        {/* product inatallation */}
-        <Route
-          path="/admin/products_installation"
-          element={
-            <PrivateRoute>
-              <AdminLayout>
-                <ProductInstallationIndex />
-              </AdminLayout>
-            </PrivateRoute>
-          }
-        />
-
+        
         {/* service */}
         <Route
           path="/admin/service"
@@ -319,45 +307,22 @@ const AppRouter: React.FC = () => {
 
         {/* service billing */}
         <Route
-          path="/admin/service_billing"
+          path="/admin/billings"
           element={
             <PrivateRoute>
               <AdminLayout>
-                <ServiceBillingIndex />
+                <BillingIndex />
               </AdminLayout>
             </PrivateRoute>
           }
         />
 
         <Route
-          path="/admin/service_billing/edit/:id"
+          path="/admin/billing/edit/:id"
           element={
             <PrivateRoute>
               <AdminLayout>
-                <EditServiceBilling />
-              </AdminLayout>
-            </PrivateRoute>
-          }
-        />
-
-        {/* service provided */}
-        <Route
-          path="/admin/service_provided"
-          element={
-            <PrivateRoute>
-              <AdminLayout>
-                <ServiceProvidedIndex />
-              </AdminLayout>
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/service_provided/edit/:id"
-          element={
-            <PrivateRoute>
-              <AdminLayout>
-                <EditServiceProvided />
+                <EditBilling />
               </AdminLayout>
             </PrivateRoute>
           }

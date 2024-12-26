@@ -1,14 +1,14 @@
 import React,{ useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import ServiceBilling from "@/components/admin/Forms/ServiceBilling";
+import Billing from "@/components/admin/Forms/Billing";
 import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 import { useNavigate } from "react-router-dom";
 
 
-const EditServiceBilling: React.FC = () => {
+const EditBilling: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // Assume `id` comes from route params
     const [initialData, setInitialData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +16,7 @@ const EditServiceBilling: React.FC = () => {
 
     useEffect(() => {
         // Fetch product data from the API
-        const fetchServiceBilling = async () => {
+        const fetchBilling = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/service-billing/${id}`, {
               withCredentials: true,
@@ -29,10 +29,10 @@ const EditServiceBilling: React.FC = () => {
         }
         };
 
-        fetchServiceBilling();
+        fetchBilling();
     }, [id]);
 
-    const handleEditServiceBilling = async (formData: FormData) => {
+    const handleEditBilling = async (formData: FormData) => {
         try {
             const response = await axios.put(`${import.meta.env.VITE_API_URL}/service-billing/${id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -42,7 +42,7 @@ const EditServiceBilling: React.FC = () => {
                 toast(<SuccessToast message={response.data.message} />, {
                     autoClose: 5000, 
                 });
-                navigate("/admin/service_billing");
+                navigate("/admin/billings");
             } else {
                 toast(<ErrorToast message={response.data.message || "Unexpected response format."} />, {
                     autoClose: 4000,
@@ -66,10 +66,10 @@ const EditServiceBilling: React.FC = () => {
 
     return (
         <div>
-            <Breadcrumb pageName="Edit Service Billing" />
-            <ServiceBilling initialData={initialData} onSubmit={handleEditServiceBilling} />
+            <Breadcrumb pageName="Edit Billing" />
+            <Billing initialData={initialData} onSubmit={handleEditBilling} />
         </div>
     );
 };
 
-export default EditServiceBilling;
+export default EditBilling;

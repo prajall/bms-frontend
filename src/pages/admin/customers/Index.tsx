@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
-import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import AddButton from "@/components/ui/buttons/AddButton";
 import Modal from "@/components/ui/Model";
-import { Button } from "@/components/ui/button";
 import {
   DeleteIcon,
   EditIcon,
@@ -27,13 +25,20 @@ export type Customer = {
 const CustomerIndex = () => {
   const [customerData, setCustomerData] = useState<Customer[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchCustomerData = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/customer`
-      );
+        `${import.meta.env.VITE_API_URL}/customer`,
+            { params: { page, limit, sortField, sortOrder, search }, }
+        );
       if (response.status === 200 && response.data.success) {
         console.log(response.data.data.customers);
         const formattedData = response.data.data.customers.map(
@@ -47,6 +52,7 @@ const CustomerIndex = () => {
           })
         );
         setCustomerData(formattedData);
+        setTotalRows(response.data.data.totalCustomers);
         setErrorMessage("");
       } else {
         setErrorMessage(response.data.message || "Failed to fetch customers.");
@@ -55,6 +61,10 @@ const CustomerIndex = () => {
       console.error("Error fetching customer data:", error);
     }
   };
+
+  useEffect(() => {
+    fetchCustomerData();
+  }, [page, limit, sortField, sortOrder, search]);
 
   const handleAction = async (action: string, id: string) => {
     if (action === "delete") {
@@ -154,10 +164,6 @@ const CustomerIndex = () => {
     },
   ];
 
-  useEffect(() => {
-    fetchCustomerData();
-  }, []);
-
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -168,8 +174,7 @@ const CustomerIndex = () => {
 
   return (
     <div className="relative">
-      <Breadcrumb pageName="Customer List" />
-      <div className="absolute top-10 right-0 p-4">
+      <div className="flex justify-end mt-1">
         <AddButton title="Add Customer" onClick={handleOpenModal} />
       </div>
       {errorMessage && (
@@ -181,6 +186,19 @@ const CustomerIndex = () => {
       <TableLayout
         columns={columns}
         data={customerData}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
         onAction={handleAction}
       />
 

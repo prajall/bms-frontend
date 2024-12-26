@@ -8,6 +8,7 @@ import axios from "axios";
 import { useTheme } from "./utils/themes.utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./assets/css/style.css"
 import TitleUpdater from "./components/admin/Header/HeaderTitle";
 import { useBusinessConfig } from "./hooks/useBusinessConfig";
 

@@ -23,7 +23,6 @@ const AddPart = ({ onSuccess }: AddPartProps) => {
         toast(<SuccessToast message={response.data.message} />, {
           autoClose: 5000,
         });
-        console.log(response.data);
         onSuccess(response.data.data);
       } else {
         toast(

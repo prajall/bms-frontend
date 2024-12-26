@@ -22,7 +22,6 @@ const EditProduct: React.FC = () => {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/product/${id}`, {
           withCredentials: true,
         });
-        console.log(response);
           if (response.data.success) {
           const product = response.data.data.product;
           // Map API response to the form's structure

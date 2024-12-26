@@ -131,7 +131,7 @@ const ProductCategoryIndex = () => {
       name: "Action",
       cell: (row: Category) => (
         <div className="inline-flex space-x-2">
-          <ShowIcon link={`/admin/category/show/${row.id}`} />
+          {/* <ShowIcon link={`/admin/category/show/${row.id}`} /> */}
           <EditIcon link={`/admin/category/edit/${row.id}`} />
           <DeleteIcon onClick={() => handleAction("delete", row.id)} />
         </div>
@@ -157,9 +157,9 @@ const ProductCategoryIndex = () => {
       <div className="flex gap-2 justify-between mt-1">
         <div className="relative w-full">
           <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <Search className="h-5 w-5" />
+            <Search className="h-5 w-5"/>
           </span>
-          <Input className="w-full pl-10" placeholder="Search Category" />
+          <Input className="pl-10 w-[300px] md:w-[400px]" placeholder="Search Category" />
         </div>
         <AddButton title="Add Category" onClick={handleOpenModal} />
       </div>
@@ -173,6 +173,7 @@ const ProductCategoryIndex = () => {
         columns={columns}
         data={categoryData}
         onAction={handleAction}
+        showSearch={false}
       />
 
       {/* Modal for Adding Category */}

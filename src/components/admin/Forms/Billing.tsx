@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { ServiceOrderSelect } from '@/components/formElements/SelectServiceOrder';
 import SelectCustomer from '@/components/formElements/SelectCustomer';
-import { useServiceOrderById } from '@/hooks/useServiceOrder';
+import { useServiceOrderById } from '@/hooks/useService';
 
 interface ServiceReference {
     _id: string;
@@ -14,28 +14,38 @@ interface ServiceReference {
     name?: string;
 }
 // Define the type for the form data
-interface ServiceBillingFormData {
+interface BillingFormData {
+    // orderId: string;
+    // order: string;
     serviceOrder: ServiceReference | string; 
-    customer: ServiceReference | string;
-    totalAmount: number;
-    paidAmount: number;
-    previousDue: number;
-    remainingAmount: number;
+    customer?: ServiceReference | string;
+    // date: string;
+    // status: string;
+    totalAmount?: number;
+    paidAmount?: number;
+    totalPaid?: number;
+    // previousDue: number;
+    remainingAmount?: number;
 }
 
-interface ServiceBillingProps {
-  initialData?: ServiceBillingFormData;
+interface BillingProps {
+  initialData?: BillingFormData;
   onSubmit: (data: FormData) => void;
 }
 
-const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }) => {
-    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ServiceBillingFormData>({
+const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<BillingFormData>({
         defaultValues: {
+            // orderId: '',
+            // order: '',
             serviceOrder: '',
             customer: '',
+            // date: '',
+            // status: 'unpaid',
             totalAmount: 0,
             paidAmount: 0,
-            previousDue: 0,
+            // totalPaid: 0,
+            // previousDue: 0,
             remainingAmount: 0,
             ...initialData,
         },
@@ -48,26 +58,17 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
     const [selectedCustomer, setSelectedCustomer] = useState<string>(
         typeof initialData?.customer === 'object' ? initialData?.customer?._id || '' : initialData?.customer || ''
     );
+    const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
 
-    const { serviceOrder: fetchedServiceOrder, loading } = useServiceOrderById(selectedServiceOrder);
+    const { serviceOrder: fetchedServiceOrder, previousBillings, loading } = useServiceOrderById(selectedServiceOrder);
+    const [initialRemainingAmount, setInitialRemainingAmount] = useState(0);
 
-    const paidAmount = watch("paidAmount");
-    const totalAmount = watch("totalAmount");
-
-    useEffect(() => {
-        const paid = Number(paidAmount) || 0;
-        const total = Number(totalAmount) || 0;
-
-        const calculatedRemaining = total - paid; 
-
-        setValue("remainingAmount", calculatedRemaining > 0 ? calculatedRemaining : 0);
-    }, [paidAmount, totalAmount, setValue]);
 
     // Sync form state and controlled states when `initialData` changes
     useEffect(() => {
         if (initialData) {
             Object.keys(initialData).forEach((key) => {
-                setValue(key as keyof ServiceBillingFormData, (initialData as any)[key]);
+                setValue(key as keyof BillingFormData, (initialData as any)[key]);
             });
 
             const serviceOrder = typeof initialData?.serviceOrder === 'object' ? initialData?.serviceOrder?._id || '' : initialData?.serviceOrder || ''
@@ -83,20 +84,43 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
 
     useEffect(() => {
         if (fetchedServiceOrder && !loading) {
+            const payStatus = fetchedServiceOrder.paymentStatus;
+            if (payStatus === 'paid' && !initialData) {
+                setPaymentMessage("Payment has already been made.");
+                return; 
+            }
             setValue("customer", fetchedServiceOrder.customer?._id || '');
-            setValue("previousDue",  fetchedServiceOrder.previousDue || 0);
-            const totalAmount = 
-            (fetchedServiceOrder.serviceCharge || 0) + 
-            (fetchedServiceOrder.previousDue || 0);
+            
+            const totalPaidAmount = previousBillings.reduce((sum, billing) => {
+                return sum + (billing.paidAmount || 0); 
+            }, 0);
+            // Calculate remaining amount
+            const initialRemaining = (fetchedServiceOrder.serviceCharge || 0) - totalPaidAmount;
+            const validRemaining = initialRemaining >= 0 ? initialRemaining : 0;
 
-        setValue("totalAmount", totalAmount);
+            setInitialRemainingAmount(validRemaining); 
+            setValue("remainingAmount", validRemaining); 
+
+            setValue("totalAmount", fetchedServiceOrder.serviceCharge || 0);
             setSelectedCustomer(fetchedServiceOrder.customer?._id || '');
         }
-    }, [fetchedServiceOrder, loading, setValue]);
+    }, [fetchedServiceOrder, previousBillings, loading, setValue]);
+
+    useEffect(() => {
+        const paid = Number(watch("paidAmount")) || 0;
+        const initialRemaining = initialRemainingAmount;
+
+        const calculatedRemaining = initialRemaining - paid;
+
+        if (calculatedRemaining >= 0) {
+            setValue("remainingAmount", calculatedRemaining);
+        }
+    }, [watch("paidAmount"), initialRemainingAmount, setValue]);
 
     const handleServiceOrderChange = (value: string) => {
         setSelectedServiceOrder(value);
         setValue("serviceOrder", value);
+        setPaymentMessage(null);
     };
 
     const handleCustomerChange = (value: string) => {
@@ -104,7 +128,7 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
         setValue("customer", value);
     };
 
-    const handleFormSubmit = async (data: ServiceBillingFormData) => {
+    const handleFormSubmit = async (data: BillingFormData) => {
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => {
             formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value.toString());
@@ -126,6 +150,7 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
                                 showAddServiceOrderButton={false}
                             />
                             {errors.serviceOrder && <p className="text-red-500 text-xs mt-1">{errors.serviceOrder.message}</p>}
+                            {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
                         </div>
 
                         {/* Customer Select */}
@@ -153,7 +178,7 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
                         </div>
 
                         {/* Next Service Date */}
-                        <div className="mb-4">
+                        {/* <div className="mb-4">
                             <Label htmlFor="previousDue">Due</Label>
                             <Input
                                 {...register("previousDue")}
@@ -163,7 +188,7 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
                                 readOnly
                             />
                             {errors.previousDue && <p className="text-red-500 text-xs mt-1">{errors.previousDue.message}</p>}
-                        </div>
+                        </div> */}
 
                         {/* Service Charge */}
                         <div className="mb-4">
@@ -198,4 +223,4 @@ const ServiceBilling: React.FC<ServiceBillingProps> = ({ initialData, onSubmit }
     );
 };
 
-export default ServiceBilling;
+export default Billing;

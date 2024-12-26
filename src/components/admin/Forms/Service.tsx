@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { Select, SelectValue, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
+import Checkbox from '@/components/ui/Checkbox';
 import TextEditor from '@/components/ui/TextEditor';
 import { MultiProduct } from '@/components/formElements/ProductSelect';
 import { MultiPart } from '@/components/formElements/PartSelect';
@@ -18,8 +19,8 @@ interface ProductOrPart {
 interface ServiceFormData {
     title: string;
     serviceType: string;
-    products: (string | ProductOrPart)[];
-    parts: (string | ProductOrPart)[];
+    // products: (string | ProductOrPart)[];
+    // parts: (string | ProductOrPart)[];
     workDetail: string;
     isRecurring: boolean;
     interval: number;
@@ -35,17 +36,18 @@ interface ServiceProps {
 }
 
 const type = [
-    { value: 'repair', label: 'Repair' },
-    { value: 'maintenance', label: 'Maintenance' },
-    { value: 'replacement', label: 'Replacement' },
+  { value: 'installation', label: 'Installation' },
+  { value: 'repair', label: 'Repair' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'replacement', label: 'Replacement' },
 ];
 
 const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
   const defaultValues: ServiceFormData = {
     title: '',
     serviceType: '',
-    products: [],
-    parts: [],
+    // products: [],
+    // parts: [],
     workDetail: '',
     isRecurring: false,
     interval: 0,
@@ -64,18 +66,19 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
   } = useForm<ServiceFormData>({ defaultValues });
 
   const [selectedType, setSelectedType] = useState(initialData?.serviceType || "");
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(
-    (initialData?.products || []).map((product) =>
-      typeof product === "object" && "_id" in product ? product._id : product
-    )
-  );
-  const [selectedParts, setSelectedParts] = useState<string[]>(
-    (initialData?.parts || []).map((part) =>
-      typeof part === "object" ? part._id || "" : part || ""
-    )
-  );
+  // const [selectedProducts, setSelectedProducts] = useState<string[]>(
+  //   (initialData?.products || []).map((product) =>
+  //     typeof product === "object" && "_id" in product ? product._id : product
+  //   )
+  // );
+  // const [selectedParts, setSelectedParts] = useState<string[]>(
+  //   (initialData?.parts || []).map((part) =>
+  //     typeof part === "object" ? part._id || "" : part || ""
+  //   )
+  // );
   const [workDetailContent, setWorkDetailContent] = useState(initialData?.workDetail || '');
   const [addNoteContent, setAddNoteContent] = useState(initialData?.additionalNotes || '');
+  const [selectedRecurring, setSelectedRecurring] = useState<boolean>(initialData?.isRecurring || false);
   const [selectedAvailability, setSelectedAvailability] = useState(initialData?.availability || "");
 
   useEffect(() => {
@@ -84,16 +87,16 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
         setValue(key as keyof ServiceFormData, (initialData as any)[key]);
       });
       setSelectedType(initialData.serviceType || "");
-      setSelectedProducts(
-      (initialData.products || []).map((product) =>
-        typeof product === "object" && "_id" in product ? product._id : product
-      )
-    );
-    setSelectedParts(
-      (initialData.parts || []).map((part) =>
-        typeof part === "object" ? part._id || "" : part || ""
-      )
-    );
+      // setSelectedProducts(
+      //   (initialData.products || []).map((product) =>
+      //     typeof product === "object" && "_id" in product ? product._id : product
+      //   )
+      // );
+      // setSelectedParts(
+      //   (initialData.parts || []).map((part) =>
+      //     typeof part === "object" ? part._id || "" : part || ""
+      //   )
+      // );
       setWorkDetailContent(initialData.workDetail || '');
       setAddNoteContent(initialData.additionalNotes || '');
       setSelectedAvailability(initialData.availability || "");
@@ -106,15 +109,15 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
     setValue("serviceType", value);
   };
 
-  const handleProductsChange = (values: string[]) => {
-    setSelectedProducts(values);
-    setValue("products", values); 
-  };
+  // const handleProductsChange = (values: string[]) => {
+  //   setSelectedProducts(values);
+  //   setValue("products", values); 
+  // };
 
-  const handlePartsChange = (values: string[]) => {
-    setSelectedParts(values);
-    setValue("parts", values); 
-  };
+  // const handlePartsChange = (values: string[]) => {
+  //   setSelectedParts(values);
+  //   setValue("parts", values); 
+  // };
 
   const handleAvailabilityChange = (value: string) => {
     setSelectedAvailability(value);
@@ -135,12 +138,12 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
   const handleFormSubmit = async (data: ServiceFormData) => {
     const transformedData = {
         ...data,
-        products: data.products.map((product) =>
-        typeof product === "object" && "_id" in product ? product._id : product
-        ),
-        parts: data.parts.map((part) =>
-        typeof part === "object" && "_id" in part ? part._id : part
-        ),
+        // products: data.products.map((product) =>
+        // typeof product === "object" && "_id" in product ? product._id : product
+        // ),
+        // parts: data.parts.map((part) =>
+        // typeof part === "object" && "_id" in part ? part._id : part
+        // ),
     };
     
     const formData = new FormData();
@@ -169,12 +172,12 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
               {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
             </div>
 
-            {/* Status */}
+            {/* type */}
             <div className='mb-4'>
-              <Label htmlFor="availability">Type</Label>
+              <Label htmlFor="serviceType">Type</Label>
               <Select value={selectedType} onValueChange={handleTypeChange}>
                 <SelectTrigger id='serviceType'>
-                  <SelectValue placeholder="Select availability" />
+                  <SelectValue placeholder="Select Service Type" />
                 </SelectTrigger>
                 <SelectContent>
                     {type.map((option) => (
@@ -188,7 +191,7 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
             </div>
             
             {/* Product Select */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <Label htmlFor="products">Products</Label>
               <MultiProduct
                 selectedValues={selectedProducts}
@@ -198,7 +201,6 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
               {errors.products && <p className="text-red-500 text-xs mt-1">{errors.products.message}</p>}
             </div>
 
-            {/* Part Select */}
             <div className="mb-4">
               <Label htmlFor="parts">Parts</Label>
               <MultiPart
@@ -207,11 +209,25 @@ const Service: React.FC<ServiceProps> = ({ initialData, onSubmit }) => {
                 showAddPartButton={true}
               />
               {errors.parts && <p className="text-red-500 text-xs mt-1">{errors.parts.message}</p>}
+            </div> */}
+
+            {/* Checkbox for IsRecurring */}
+            <div className="mb-4">
+              <Checkbox
+                id="isRecurring"
+                label="Is Recurring"
+                checked={selectedRecurring} 
+                onChange={(checked) => {
+                  setSelectedRecurring(checked);
+                  setValue("isRecurring", checked); 
+                }}
+              />
+              {errors.isRecurring && <p className="text-red-500 text-xs mt-1">{errors.isRecurring.message}</p>}
             </div>
 
             {/* Interval */}
             <div className="mb-4">
-              <Label htmlFor="interval">Interval</Label>
+              <Label htmlFor="interval">Interval(Days)</Label>
               <Input
                 {...register("interval", { required: "Interval is required" })}
                 id="interval"

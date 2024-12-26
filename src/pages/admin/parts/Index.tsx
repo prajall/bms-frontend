@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
-import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import AddButton from "@/components/ui/buttons/AddButton";
 import {
   DeleteIcon,
@@ -10,8 +9,6 @@ import {
 } from "@/components/ui/buttons/IconBtn";
 import Modal from "@/components/ui/Model";
 import AddPart from "./Create";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 
 type Part = {
   id: string;
@@ -78,16 +75,21 @@ const handleAction = (action: string, id: string) => {
 };
 
 const PartIndex = () => {
-  const [partData, setpartData] = useState<Part[]>([]);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchpartData = async () => {
+    const [partData, setpartData] = useState<Part[]>([]);
+    const [totalRows, setTotalRows] = useState(0);
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(20);
+    const [sortField, setSortField] = useState("");
+    const [sortOrder, setSortOrder] = useState("");
+    const [search, setSearch] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const fetchpartData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/part`
-        );
+          `${import.meta.env.VITE_API_URL}/part`,
+          { params: { page, limit, sortField, sortOrder, search }, });
 
         if (response.status === 200 && response.data.success) {
           const formattedData = response.data.data.parts.map((part: any) => ({
@@ -100,6 +102,7 @@ const PartIndex = () => {
           }));
           setpartData(formattedData);
           setErrorMessage("");
+          setTotalRows(response.data.data.totalParts);
         } else {
           setErrorMessage(response.data.message || "Failed to fetch Parts.");
         }
@@ -108,8 +111,9 @@ const PartIndex = () => {
       }
     };
 
+  useEffect(() => {
     fetchpartData();
-  }, []);
+  }, [page, limit, sortField, sortOrder, search]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -121,16 +125,7 @@ const PartIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex gap-2 justify-between mt-1">
-        <div className="relative w-full">
-          <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <Search className="h-5 w-5" />
-          </span>
-          <Input
-            className="w-full pl-10" // Adds padding to avoid overlapping with the icon
-            placeholder="Search Parts"
-          />
-        </div>
+      <div className="flex justify-end mt-1">
         <AddButton title="Add Product" onClick={handleOpenModal} />
       </div>
       {errorMessage && (
@@ -140,7 +135,24 @@ const PartIndex = () => {
       )}
 
       {/* Pass dynamic title */}
-      <TableLayout columns={columns} data={partData} onAction={handleAction} />
+      <TableLayout
+        columns={columns}
+        data={partData}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
+        onAction={handleAction}
+      />
 
       {/* Modal for Adding Category */}
       <Modal

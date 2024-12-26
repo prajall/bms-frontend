@@ -1,8 +1,5 @@
-import React, { useState } from "react";
-import axios from "axios";
 import ServiceOrder from "@/components/admin/Forms/ServiceOrder";
-import { toast } from "react-toastify";
-import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
+import { createServiceOrder } from "@/hooks/useService";
 
 type AddServiceOrderProps = {
   onSuccess: () => void;
@@ -10,38 +7,14 @@ type AddServiceOrderProps = {
 
 const AddServiceOrder = ({ onSuccess }: AddServiceOrderProps) => {
     const handleAddServiceOrder = async (formData: FormData) => {
-        try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/service-order`, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-                withCredentials: true,
-            });
-            if (response.status === 201 && response.data.success) {
-                toast(<SuccessToast message={response.data.message} />, {
-                    autoClose: 5000, 
-                });
-                onSuccess();
-            } else {
-                toast(<ErrorToast message={response.data.message || "Unexpected response format."} />, {
-                    autoClose: 4000,
-                });
-            }
-        } catch (error: any) {
-            if (error.response && error.response.data) {
-                const errorMessage = error.response.data.message || "Failed to create service order.";
-                toast(<ErrorToast message={errorMessage} />, {
-                    autoClose: 4000, 
-                });
-            } else {
-                toast(<ErrorToast message={"Network error. Please try again later."} />, {
-                    autoClose: 4000, 
-                });              
-            }
-        }
+        createServiceOrder(formData, () => {
+            onSuccess(); 
+        });
     };
 
     return (
         <div className="relative">
-            <ServiceOrder onSubmit={handleAddServiceOrder} />
+            <ServiceOrder type={"create"} onSubmit={handleAddServiceOrder} />
         </div>
     );
 }

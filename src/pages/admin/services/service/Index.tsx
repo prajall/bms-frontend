@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
-import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import AddButton from "@/components/ui/buttons/AddButton";
 import Modal from "@/components/ui/Model";
 import {
@@ -12,8 +11,6 @@ import {
 import AddService from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
 type Service = {
   id: string;
@@ -29,25 +26,32 @@ type Service = {
 
 const ServiceIndex = () => {
   const [serviceData, setServiceData] = useState<Service[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchServiceData = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/service`
+        `${import.meta.env.VITE_API_URL}/service`,
+          { params: { page, limit, sortField, sortOrder, search }, }
       );
       if (response.status === 200 && response.data.success) {
         const formattedData = response.data.data.services.map((item: any) => ({
           id: item._id,
           title: item.title || "",
           serviceType: item.serviceType || "",
-          products: item.products.length
-            ? item.products.map((product: any) => product.name).join(", ")
-            : "",
-          parts: item.parts.length
-            ? item.parts.map((part: any) => part.name).join(", ")
-            : "",
+          // products: item.products.length
+          //   ? item.products.map((product: any) => product.name).join(", ")
+          //   : "",
+          // parts: item.parts.length
+          //   ? item.parts.map((part: any) => part.name).join(", ")
+          //   : "",
           serviceCharge: item.serviceCharge
             ? item.serviceCharge.toString()
             : "0",
@@ -56,6 +60,7 @@ const ServiceIndex = () => {
           additionalNotes: stripHtmlTags(item.additionalNotes || ""),
         }));
         setServiceData(formattedData);
+        setTotalRows(response.data.data.totalServices);
         setErrorMessage("");
       } else {
         setErrorMessage(response.data.message || "Failed to fetch service.");
@@ -134,8 +139,8 @@ const ServiceIndex = () => {
       selector: (row: Service) => row.serviceType,
       sortable: true,
     },
-    { name: "Products", selector: (row: Service) => row.products, wrap: true },
-    { name: "Parts", selector: (row: Service) => row.parts, wrap: true },
+    // { name: "Products", selector: (row: Service) => row.products, wrap: true },
+    // { name: "Parts", selector: (row: Service) => row.parts, wrap: true },
     { name: "Charge", selector: (row: Service) => row.serviceCharge },
     { name: "Availability", selector: (row: Service) => row.availability },
     {
@@ -163,7 +168,7 @@ const ServiceIndex = () => {
 
   useEffect(() => {
     fetchServiceData();
-  }, []);
+  }, [page, limit, sortField, sortOrder, search]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -175,16 +180,7 @@ const ServiceIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex gap-2 justify-between mt-1">
-        <div className="relative w-full">
-          <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <Search className="h-5 w-5" />
-          </span>
-          <Input
-            className="w-full pl-10" // Adds padding to avoid overlapping with the icon
-            placeholder="Search Services"
-          />
-        </div>
+      <div className="flex justify-end mt-1">
         <AddButton title="Add Service" onClick={handleOpenModal} />
       </div>
       {errorMessage && (
@@ -196,6 +192,19 @@ const ServiceIndex = () => {
       <TableLayout
         columns={columns}
         data={serviceData}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
         onAction={handleAction}
       />
 
