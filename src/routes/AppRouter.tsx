@@ -35,8 +35,6 @@ import EditPart from "@/pages/admin/parts/Edit";
 
 import POSIndex from "@/pages/admin/POS/Index";
 
-import ProductInstallationIndex from "@/pages/admin/productInstallation/Index";
-
 import ServiceIndex from "@/pages/admin/services/service/Index";
 import EditService from "@/pages/admin/services/service/Edit";
 import TitleUpdater from "@/components/admin/Header/HeaderTitle";
@@ -45,10 +43,8 @@ import ServiceOrderIndex from "@/pages/admin/services/service-order/Index";
 import EditServiceOrder from "@/pages/admin/services/service-order/Edit";
 
 import BillingIndex from "@/pages/admin/billing/Index";
+import AddBilling from "@/pages/admin/billing/Create";
 import EditBilling from "@/pages/admin/billing/Edit";
-
-import ServiceProvidedIndex from "@/pages/admin/services/service-provided/Index";
-import EditServiceProvided from "@/pages/admin/services/service-provided/Edit";
 
 import SystemConfigurationPage from "@/pages/admin/configs/System";
 import BusinessConfigurationPage from "@/pages/admin/configs/Business";
@@ -312,6 +308,17 @@ const AppRouter: React.FC = () => {
             <PrivateRoute>
               <AdminLayout>
                 <BillingIndex />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/billings/create"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <AddBilling />
               </AdminLayout>
             </PrivateRoute>
           }

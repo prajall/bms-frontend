@@ -86,12 +86,12 @@ const useServiceOrders = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchServiceOrder = useCallback(async () => {
-    const apiUrl = `${import.meta.env.VITE_API_URL}/service-order`;
+    const apiUrl = `${import.meta.env.VITE_API_URL}/service-order/mini-list`;
     setLoading(true);
     try {
       const response = await axios.get(apiUrl, { withCredentials: true });
       if (response.status === 200 && response.data.success) {
-        setServiceOrder(response.data.data.serviceOrders);
+        setServiceOrder(response.data.data);
       }
     } catch (err) {
       console.error("Failed to fetch service order:", err);

@@ -2,21 +2,19 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
 import AddButton from "@/components/ui/buttons/AddButton";
-import Modal from "@/components/ui/Model";
 import {
   DeleteIcon,
   EditIcon,
   ShowIcon,
   PrintIcon
 } from "@/components/ui/buttons/IconBtn";
-import AddBilling from "./Create";
-import { printPreview } from "./printPreview";
+// import AddBilling from "./Create";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
-import PrintWrapper from "@/components/admin/PrintWrapper";
 import Invoice from "./Invoice";
 
-type Billing = {
+export type Billing = {
   id: string;
   invoice: string;
   orderId: string;
@@ -32,6 +30,7 @@ type Billing = {
 };
 
 const BillingIndex = () => {
+  const navigate = useNavigate();
   const [billingData, setBillingData] = useState<Billing[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [page, setPage] = useState(1);
@@ -40,7 +39,6 @@ const BillingIndex = () => {
   const [sortOrder, setSortOrder] = useState("");
   const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [billToPrint, setBillToPrint] = useState<Billing | null>(null);
 
   const fetchBillingData = async () => {
@@ -127,7 +125,6 @@ const BillingIndex = () => {
   const columns = [
         {
         name: "SN",
-        // selector: (_: Billing, index: number) => index + 1,
         cell: (_: Billing, index: number) => index + 1,
         sortable: false,
         width: "60px",
@@ -171,35 +168,9 @@ const BillingIndex = () => {
   const printBill = (bill: Billing) => {
     setBillToPrint(bill);
   };
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleAddBillingSuccess = (bill: any) => {
-    const formattedBill = {
-      id: bill._id,
-      invoice: "Demo123",
-      orderId: bill.orderId || "",
-      customer: bill.customer?.name || "Guest",
-      totalAmount: bill.totalAmount,
-      paidAmount: bill.paidAmount,
-      totalPaid: bill.totalPaid,
-      date: bill.date ? new Date(bill.date) : new Date(),
-      service: bill.serviceOrder?.service?.title,
-      customerPhone: bill.customer?.phoneNo,
-      customerAddress: bill.customer
-        ? `${bill.customer.address.houseNo}, ${bill.customer.address.addressLine}, ${bill.customer.address.city}, ${bill.customer.address.province}, ${bill.customer.address.country}`
-        : "Address not available",
-      serviceCharge: bill.serviceOrder?.serviceCharge,
-    };
-    setBillToPrint(formattedBill); // Automatically print the newly created bill
-    fetchBillingData();
-  };
+  const createBilling = () => {
+    navigate("/admin/billings/create");
+  }
 
   useEffect(() => {
     fetchBillingData();
@@ -208,7 +179,7 @@ const BillingIndex = () => {
   return (
     <div className="relative">
       <div className="flex justify-end mt-1">
-        <AddButton title="Add Service Billing" onClick={handleOpenModal} />
+        <AddButton title="Add Service Billing" onClick={createBilling} />
       </div>
       {errorMessage && (
         <div className="alert alert-error">
@@ -235,29 +206,8 @@ const BillingIndex = () => {
         onAction={handleAction}
       />
 
-      {/* Modal for Adding Service Billing */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title="Create Service Billing"
-        size="4xl"
-      >
-        <AddBilling
-          onSuccess={(bill: any) => {
-            handleCloseModal();
-            fetchBillingData();
-            printBill(bill);
-          }}
-        />
-      </Modal>
-
       {billToPrint && (
-        <PrintWrapper
-          component={Invoice}
-          data={{ bill: billToPrint }}
-          documentTitle={`Invoice-${billToPrint.invoice}`}
-          onAfterPrint={() => setBillToPrint(null)}
-        />
+        <Invoice bill={billToPrint}  />
       )}
     </div>
   );
