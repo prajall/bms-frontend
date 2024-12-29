@@ -8,6 +8,7 @@ interface ServiceOrderSelectProps {
   onChange: (value: string) => void;
   loadingText?: string;
   showAddServiceOrderButton?: boolean;
+  type?: string;
 }
 
 const ServiceOrderSelect: React.FC<ServiceOrderSelectProps> = ({
@@ -15,12 +16,22 @@ const ServiceOrderSelect: React.FC<ServiceOrderSelectProps> = ({
   onChange,
   loadingText = "Loading service order...",
   showAddServiceOrderButton = false,
+  type = '',
 }) => {
   const { serviceOrders, loading, refetch } = useServiceOrders();
-  const options = serviceOrders.map((order) => ({
+  let options = [];
+  if (type === 'OrderId') {
+    options = serviceOrders.map((order) => ({
+      value: order.orderId || order._id,
+      label: order.orderId,
+    }));
+  } else {
+    options = serviceOrders.map((order) => ({
     value: order._id,
-    label: order.orderId || order._id,
+    label: order.orderId,
   }));
+  }
+  
 
   const handleAddServiceOrder = () => {
     console.log("Navigate to the add service order page or show a modal.");

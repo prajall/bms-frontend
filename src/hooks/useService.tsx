@@ -3,15 +3,14 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { SuccessToast, ErrorToast } from '@/components/ui/customToast';
 
-
 export interface ServiceOrder {
   _id: string;
   title: string;
-    customer?: {
-      _id: string;
-      name: string;
-    };
-  // previousDue: number;
+  customer?: {
+    _id: string;
+    name: string;
+  };
+  order?: any;
   serviceCharge: number;
   interval?: number;
   isRecurring?: boolean;
@@ -140,4 +139,37 @@ const useServiceOrderById = (id: string) => {
   return { serviceOrder, previousBillings, loading };
 };
 
-export { useServiceById,createServiceOrder, useServiceOrders, useServiceOrderById };
+const useServiceOrderByOrderId = (orderId: string) => {
+  const [serviceOrder, setServiceOrder] = useState<ServiceOrder | null>(null);
+  const [previousBillings, setPreviousBillings] = useState<ServiceOrder[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchServiceOrderByOrderId = async () => {
+      const apiUrl = `${import.meta.env.VITE_API_URL}/service-order/orderid/${orderId}`;
+      try {
+        const response = await axios.get(apiUrl, {
+          withCredentials: true,
+        });
+        if (response.status === 200 && response.data.message === "Service order retrieved successfully") {
+          setServiceOrder(response.data.data.serviceOrder);
+          setPreviousBillings(response.data.data.previousBillings || []);
+        } else {
+          console.error(response.data.message || "Failed to fetch service order by ID.");
+        }
+      } catch (err) {
+        console.error("Failed to fetch service order by ID:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (orderId) {
+      fetchServiceOrderByOrderId();
+    }
+  }, [orderId]);
+
+  return { serviceOrder, previousBillings, loading };
+};
+
+export { useServiceById,createServiceOrder, useServiceOrders, useServiceOrderById, useServiceOrderByOrderId };

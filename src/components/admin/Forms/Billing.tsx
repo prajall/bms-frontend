@@ -17,7 +17,7 @@ interface ServiceReference {
 interface BillingFormData {
     // orderId: string;
     // order: string;
-    serviceOrder: ServiceReference | string; 
+    serviceOrder: string; 
     customer?: ServiceReference | string;
     // date: string;
     // status: string;
@@ -26,6 +26,7 @@ interface BillingFormData {
     totalPaid?: number;
     // previousDue: number;
     remainingAmount?: number;
+    orderId?: string;
 }
 
 interface BillingProps {
@@ -47,20 +48,24 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
             // totalPaid: 0,
             // previousDue: 0,
             remainingAmount: 0,
+            orderId: '',
             ...initialData,
         },
     });
 
     // States for controlled fields
-    const [selectedServiceOrder, setSelectedServiceOrder] = useState<string>(
-        typeof initialData?.serviceOrder === 'object' ? initialData?.serviceOrder?._id || '' : initialData?.serviceOrder || ''
-    );
+    // const [selectedServiceOrder, setSelectedServiceOrder] = useState<string>(
+    //     typeof initialData?.serviceOrder === 'object' ? initialData?.serviceOrder?._id || '' : initialData?.serviceOrder || ''
+    // );
     const [selectedCustomer, setSelectedCustomer] = useState<string>(
         typeof initialData?.customer === 'object' ? initialData?.customer?._id || '' : initialData?.customer || ''
     );
     const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+    const [orderId, setOrderId] = useState<string | null>(initialData?.orderId || 'Please Chose Order');
 
-    const { serviceOrder: fetchedServiceOrder, previousBillings, loading } = useServiceOrderById(selectedServiceOrder);
+    const serviceOrderId = watch("serviceOrder");
+
+    const { serviceOrder: fetchedServiceOrder, previousBillings, loading } = useServiceOrderById(serviceOrderId);
     const [initialRemainingAmount, setInitialRemainingAmount] = useState(0);
 
 
@@ -70,14 +75,12 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
             Object.keys(initialData).forEach((key) => {
                 setValue(key as keyof BillingFormData, (initialData as any)[key]);
             });
-
-            const serviceOrder = typeof initialData?.serviceOrder === 'object' ? initialData?.serviceOrder?._id || '' : initialData?.serviceOrder || ''
-            setValue('serviceOrder', serviceOrder);
+            setValue('serviceOrder', initialData?.serviceOrder || '');
 
             const customer = typeof initialData?.customer === 'object' ? initialData?.customer?._id || '' : initialData?.customer || ''
             setValue('customer', customer);
-
-            setSelectedServiceOrder(serviceOrder);
+            setOrderId(initialData?.orderId || '');
+            // setSelectedServiceOrder(serviceOrder);
             setSelectedCustomer(customer);
         }
     }, [initialData, setValue]);
@@ -117,11 +120,11 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
         }
     }, [watch("paidAmount"), initialRemainingAmount, setValue]);
 
-    const handleServiceOrderChange = (value: string) => {
-        setSelectedServiceOrder(value);
-        setValue("serviceOrder", value);
-        setPaymentMessage(null);
-    };
+    // const handleServiceOrderChange = (value: string) => {
+    //     setSelectedServiceOrder(value);
+    //     setValue("serviceOrder", value);
+    //     setPaymentMessage(null);
+    // };
 
     const handleCustomerChange = (value: string) => {
         setSelectedCustomer(value);
@@ -143,12 +146,14 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
                         {/* Service Select */}
                         <div className="mb-4">
-                            <Label htmlFor="service">Service Order</Label>
-                            <ServiceOrderSelect
+                            <Label htmlFor="order">Service Order</Label>
+                            {/* <ServiceOrderSelect
                                 selectedServiceOrder={selectedServiceOrder}
                                 onChange={handleServiceOrderChange}
                                 showAddServiceOrderButton={false}
-                            />
+                            /> */}
+                            <Input type='hidden' id='serviceOrder' />
+                            {orderId && <p className="text-orange-500 bold">{orderId}</p>}
                             {errors.serviceOrder && <p className="text-red-500 text-xs mt-1">{errors.serviceOrder.message}</p>}
                             {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
                         </div>

@@ -1,7 +1,7 @@
 import React,{ useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import Billing from "@/components/admin/Forms/Billing";
+import Billings from "@/components/admin/Forms/Billings";
 import Breadcrumb from "@/components/admin/Breadcrumbs/Breadcrumb";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
@@ -65,7 +65,7 @@ const EditBilling: React.FC = () => {
     return (
         <div>
             <Breadcrumb pageName="Edit Billing" />
-            <Billing initialData={initialData} onSubmit={handleEditBilling} />
+            <Billings initialData={initialData} onSubmit={handleEditBilling} />
         </div>
     );
 };

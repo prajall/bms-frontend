@@ -10,6 +10,7 @@ type ServiceBillingProps = {
 
 interface Billing {
     serviceOrder: string;
+    orderId: string;
 }
 
 const ServiceBilling = ({ orderId, onSuccess }: ServiceBillingProps) => {
@@ -27,6 +28,7 @@ const ServiceBilling = ({ orderId, onSuccess }: ServiceBillingProps) => {
                 const order = response.data.data.serviceOrder;
                 const mappedData: Billing = {
                     serviceOrder: order._id,
+                    orderId: order.orderId,
                 }
                 setInitialData(mappedData);
             } else {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Billing from "@/components/admin/Forms/Billing";
+import Billings from "@/components/admin/Forms/Billings";
 import { createBilling } from "@/hooks/useBilling";
 import Invoice from "./Invoice";
 import { useNavigate } from "react-router-dom";
@@ -39,8 +39,8 @@ const AddBilling = () => {
 
     return (
         <div className="relative">
-            <Breadcrumb pageName="Create Billing" />
-            <Billing onSubmit={handleAddBilling} />
+            <Breadcrumb pageName="Create Billings" />
+            <Billings onSubmit={handleAddBilling} />
             {billToPrint && (
                 <Invoice bill={billToPrint}  />
             )}
