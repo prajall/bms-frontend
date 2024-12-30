@@ -7,22 +7,37 @@ import { useForm } from 'react-hook-form';
 import { ServiceOrderSelect } from '@/components/formElements/SelectServiceOrder';
 import SelectCustomer from '@/components/formElements/SelectCustomer';
 import { useServiceOrderByOrderId } from '@/hooks/useService';
+import { toast } from "react-toastify";
+import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 
 interface ServiceReference {
   _id: string;
-  title?: string;
+  orderId?: string;
+  service?: {
+    title: string;
+  };
   serviceCharge?: number;
+  remainingBalance?: number;
 }
 
 interface BillingsFormData {
-  orderId: ServiceReference | string;
+  date: string;
+  orderId: string;
   serviceOrders: ServiceReference[];
   customer?: ServiceReference | string;
   totalAmount?: number;
   paidAmount?: number;
   previousPaidAmount?: number;
   remainingAmount?: number;
+  discount?: number;
+  tax?: number;
+  finalTotal?: number;
 }
+
+const formatDateToYYYYMMDD = (date: string | Date) => {
+  const d = new Date(date);
+  return d.toISOString().split('T')[0]; 
+};
 
 interface BillingsProps {
   initialData?: BillingsFormData;
@@ -38,6 +53,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     formState: { errors },
   } = useForm<BillingsFormData>({
     defaultValues: {
+      date: formatDateToYYYYMMDD(new Date()),
       orderId: '',
       serviceOrders: [],
       customer: '',
@@ -45,6 +61,9 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       paidAmount: 0,
       previousPaidAmount: 0,
       remainingAmount: 0,
+      discount: 0,
+      tax: 0,
+      finalTotal: 0,
       ...initialData,
     },
   });
@@ -58,11 +77,18 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       ? initialData?.customer?._id || ''
       : initialData?.customer || ''
   );
-  console.log(selectedServiceOrder);
+
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const { serviceOrder, previousBillings, loading } = useServiceOrderByOrderId(selectedServiceOrder);
+
+  const updateServiceOrders = (newServiceOrders: ServiceReference[]) => {
+    setServiceOrders(newServiceOrders);
+    setValue('serviceOrders', newServiceOrders);
+  };
 
   useEffect(() => {
     if (initialData) {
+      setValue('date', formatDateToYYYYMMDD(initialData.date || new Date()));
       setValue('orderId', initialData.orderId);
       setValue('serviceOrders', initialData.serviceOrders);
       const customer =
@@ -70,20 +96,58 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
           ? initialData?.customer?._id || ''
           : initialData?.customer || '';
       setValue('customer', customer);
-      setServiceOrders(initialData.serviceOrders || []);
+      // setServiceOrders(initialData.serviceOrders || []);
+      updateServiceOrders(initialData.serviceOrders || []);
     }
   }, [initialData, setValue]);
 
   useEffect(() => {
     if (selectedServiceOrder && serviceOrder && !loading) {
       const fetchedCustomer = serviceOrder.customer?._id || '';
-
       if (serviceOrders.length > 0 && fetchedCustomer !== selectedCustomer) {
-        alert('Customer mismatch. Cannot add this service order.');
+        toast(<ErrorToast message={"Customer mismatch. Cannot add this service order."} />);
         return;
       }
+      const newServiceOrders = serviceOrder.order
+        .filter((newOrder: any) => {
+          if (newOrder.paymentStatus === "paid" && !initialData) {
+            setPaymentMessage("Payment has already been made.");
+            return false; 
+          }
+          return true; 
+        })
+        .map((newOrder: any) => {
+        const totalPaid = previousBillings
+          .filter((billing) => billing.serviceOrder === newOrder._id)
+          .reduce((sum, billing) => sum + (billing.paidAmount || 0), 0);
+        return {
+          ...newOrder,
+          orderId: serviceOrder.orderId,
+          remainingBalance: (newOrder.serviceCharge || 0) - totalPaid,
+        };
+        }) || [];
+      
+      setServiceOrders((prev) => {
+        const uniqueOrders: ServiceReference[] = [
+          ...prev,
+          ...newServiceOrders.filter(
+            (newOrder: ServiceReference) => !prev.some((existingOrder) => existingOrder._id === newOrder._id)
+          ),
+        ];
+        setValue('serviceOrders', uniqueOrders); 
+        return uniqueOrders;
+      });
 
-      setServiceOrders((prev) => [...prev, ...serviceOrder.order]);
+
+    //   setServiceOrders((prev) => {
+    //   const uniqueOrders = [
+    //     ...prev,
+    //     ...newServiceOrders.filter(
+    //       (newOrder:any) => !prev.some((existingOrder) => existingOrder._id === newOrder._id)
+    //     ),
+    //   ];
+    //   return uniqueOrders;
+    // });
 
       if (!selectedCustomer) {
         setSelectedCustomer(fetchedCustomer);
@@ -97,8 +161,8 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
 
       setValue('previousPaidAmount', totalPreviousPaid);
 
-      const totalAmount = serviceOrders.reduce(
-        (sum, order) => sum + (order.serviceCharge || 0),
+      const totalAmount = [...serviceOrders, ...newServiceOrders].reduce(
+      (sum, order) => sum + (order.serviceCharge || 0),
         0
       );
 
@@ -107,25 +171,45 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       setValue('totalAmount', totalAmount);
       setValue('remainingAmount', remainingAmount > 0 ? remainingAmount : 0);
     }
-  }, [serviceOrder, loading, selectedCustomer, previousBillings, serviceOrders, setValue]);
+  }, [selectedServiceOrder, serviceOrder, loading, previousBillings]);
 
   useEffect(() => {
     const totalPaid = Number(watch('paidAmount')) || 0;
     const previousPaid = Number(watch('previousPaidAmount')) || 0;
     const totalAmount = Number(watch('totalAmount')) || 0;
+    const discount = Number(watch('discount')) || 0;
+    const tax = Number(watch('tax')) || 0;
 
     const remainingAmount = totalAmount - (previousPaid + totalPaid);
+    const finalTotal = Math.max(remainingAmount - discount + tax, 0);
 
     setValue('remainingAmount', remainingAmount > 0 ? remainingAmount : 0);
-  }, [watch('paidAmount'), watch('previousPaidAmount'), watch('totalAmount'), setValue]);
+    setValue('finalTotal', finalTotal);
+  }, [watch('paidAmount'), watch('previousPaidAmount'), watch('totalAmount'), watch('discount'), watch('tax')]);
 
   const handleServiceOrderRemove = (id: string) => {
-    setServiceOrders((prev) => prev.filter((order) => order._id !== id));
+    setServiceOrders((prev) => {
+      const updatedOrders = prev.filter((order) => order._id !== id);
+      const newTotalAmount = updatedOrders.reduce(
+        (sum, order) => sum + (order.serviceCharge || 0),
+        0
+      );
+
+      const previousPaidAmount = Number(watch('previousPaidAmount')) || 0;
+      const paidAmount = Number(watch('paidAmount')) || 0;
+      const newRemainingAmount = newTotalAmount - (previousPaidAmount + paidAmount);
+
+      setValue('totalAmount', newTotalAmount);
+      setValue('remainingAmount', Math.max(newRemainingAmount, 0));
+
+      return updatedOrders;
+    });
   };
 
   const handleServiceOrderChange = (value: string) => {
     setSelectedServiceOrder(value);
     setValue('orderId', value);
+    setPaymentMessage(null);
   };
 
   const handleCustomerChange = (value: string) => {
@@ -134,8 +218,27 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
   };
 
   const handleFormSubmit = async (data: BillingsFormData) => {
+    console.log(data.serviceOrders);
+    if (!data.serviceOrders || data.serviceOrders.length === 0) {
+      toast(<ErrorToast message="Service Orders cannot be empty." />);
+      return;
+    }
+    
+    const minimalServiceOrders = data.serviceOrders.map((order) => ({
+      order: order._id,
+      orderId: order.orderId,
+    }));
+
+    const transformedData = {
+      ...data,
+      serviceOrders: minimalServiceOrders,
+    };
+
+    const { orderId, ...dataWithoutOrderId } = transformedData;
+
     const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
+
+    Object.entries(dataWithoutOrderId).forEach(([key, value]) => {
       formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value.toString());
     });
     onSubmit(formData);
@@ -146,17 +249,17 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       <Card>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
-            {/* Order ID */}
-            <div className="mb-4">
-              <Label htmlFor="orderId">Order ID</Label>
-              <ServiceOrderSelect
-                selectedServiceOrder={selectedServiceOrder}
-                onChange={handleServiceOrderChange}
-                showAddServiceOrderButton={false}
-                type={"OrderId"}
+            {/* Service Date */}
+          <div className="mb-4">
+              <Label htmlFor="date">Service Date<span className="text-red-400">*</span></Label>
+              <Input
+                  {...register("date", { required: "Service Date is required" })}
+                  id="date"
+                  type="date"
+                  placeholder="Select service date"
               />
-              {errors.orderId && <p className="text-red-500 text-xs mt-1">{errors.orderId.message}</p>}
-            </div>
+              {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
+          </div>
 
             {/* Customer */}
             <div className="mb-4">
@@ -167,6 +270,19 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
                 readOnly
               />
             </div>
+
+            {/* Order ID */}
+            <div className="mb-4">
+              <Label htmlFor="orderId">Order ID</Label>
+              <ServiceOrderSelect
+                selectedServiceOrder={selectedServiceOrder}
+                onChange={handleServiceOrderChange}
+                showAddServiceOrderButton={false}
+                type={"OrderId"}
+              />
+              {errors.orderId && <p className="text-red-500 text-xs mt-1">{errors.orderId.message}</p>}
+              {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
+            </div>
           </div>
 
           {/* Service Order Table */}
@@ -175,29 +291,36 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
             <table className="table-auto w-full border border-gray-300 mt-2">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-4 py-2">Title</th>
+                  <th className="border border-gray-300 px-4 py-2">SN</th>
+                  <th className="border border-gray-300 px-4 py-2">Order ID</th>
+                  <th className="border border-gray-300 px-4 py-2">Service</th>
                   <th className="border border-gray-300 px-4 py-2">Service Charge</th>
+                  <th className="border border-gray-300 px-4 py-2">Remaining Balance</th>
                   <th className="border border-gray-300 px-4 py-2">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {serviceOrders.map((order) => (
+                {serviceOrders.map((order, index) => (
                   <tr key={order._id}>
-                    <td className="border border-gray-300 px-4 py-2">{order.title}</td>
-                    <td className="border border-gray-300 px-4 py-2">${order.serviceCharge}</td>
+                    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                    <td className="border border-gray-300 px-4 py-2">{order.orderId}</td>
+                    <td className="border border-gray-300 px-4 py-2">{order.service?.title}</td>
+                    <td className="border border-gray-300 px-4 py-2">Rs.{order.serviceCharge}</td>
+                    <td className="border border-gray-300 px-4 py-2">Rs.{order.remainingBalance || 0}</td>
                     <td className="border border-gray-300 px-4 py-2">
                       <Button variant="outline" onClick={() => handleServiceOrderRemove(order._id)}>
-                        Remove
+                        ✗
                       </Button>
                     </td>
                   </tr>
                 ))}
-                {/* Totals Row */}
                 <tr className="font-bold">
-                  <td className="border border-gray-300 px-4 py-2 text-right" colSpan={2}>
+                  <td className="border border-gray-300 px-4 py-2 text-right" colSpan={3}>
                     Total
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">${watch('totalAmount') || 0}</td>
+                  <td className="border border-gray-300 px-4 py-2">Rs.{watch('totalAmount') || 0}</td>
+                  <td className="border border-gray-300 px-4 py-2">Rs.{watch('remainingAmount') || 0}</td>
+                  <td className="border border-gray-300 px-4 py-2"></td>
                 </tr>
               </tbody>
             </table>
@@ -222,8 +345,18 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
             </div>
 
             <div className="mb-4">
-              <Label htmlFor="previousPaidAmount">Previous Billing Paid</Label>
-              <Input {...register('previousPaidAmount')} id="previousPaidAmount" type="number" readOnly />
+              <Label htmlFor="discount">Discount</Label>
+              <Input {...register('discount')} id="discount" type="number" placeholder="Enter Discount" />
+            </div>
+
+            <div className="mb-4">
+              <Label htmlFor="tax">Tax</Label>
+              <Input {...register('tax')} id="tax" type="number" placeholder="Enter Tax" />
+            </div>
+
+            <div className="mb-4">
+              <Label htmlFor="finalTotal">Final Total</Label>
+              <Input {...register('finalTotal')} id="finalTotal" type="number" readOnly />
             </div>
           </div>
         </CardContent>

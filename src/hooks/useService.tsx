@@ -18,6 +18,7 @@ export interface ServiceOrder {
   remainingAmount?: number;
   paidAmount?: number;
   paymentStatus?: string;
+  serviceOrder?: string;
 }
 
 const useServiceById = (id: string) => {
@@ -151,7 +152,7 @@ const useServiceOrderByOrderId = (orderId: string) => {
         const response = await axios.get(apiUrl, {
           withCredentials: true,
         });
-        if (response.status === 200 && response.data.message === "Service order retrieved successfully") {
+        if (response.status === 200 && response.data.success) {
           setServiceOrder(response.data.data.serviceOrder);
           setPreviousBillings(response.data.data.previousBillings || []);
         } else {
