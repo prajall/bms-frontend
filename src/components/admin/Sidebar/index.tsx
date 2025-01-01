@@ -79,7 +79,7 @@ const menuItems = [
   },
   { name: "Roles and Permission", icon: Shield, link: "/admin/roles" },
   { name: "Bookings", icon: Calendar, link: "/bookings" },
-  { name: "Orders", icon: ShoppingCart, link: "/orders" },
+  // { name: "Orders", icon: ShoppingCart, link: "/orders" },
   { name: "Billings", icon: FileText, link: "/admin/billings" },
   { name: "Reports", icon: BarChart2, link: "/reports" },
   { name: "Templates", icon: FileIcon, link: "/templates" },

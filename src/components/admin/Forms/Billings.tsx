@@ -13,6 +13,7 @@ import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 interface ServiceReference {
   _id: string;
   orderId?: string;
+  order?: string;
   service?: {
     title: string;
   };
@@ -224,9 +225,11 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       return;
     }
     
+    console.log(data.serviceOrders);
     const minimalServiceOrders = data.serviceOrders.map((order) => ({
-      order: order._id,
+      serviceOrder: order._id,
       orderId: order.orderId,
+      order: order.order,
     }));
 
     const transformedData = {

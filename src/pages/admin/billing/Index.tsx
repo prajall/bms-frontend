@@ -50,7 +50,7 @@ const BillingIndex = () => {
       if (response.status === 200 && response.data.success) {
         const formattedData = response.data.data.billings.map((item: any) => ({
           id: item._id,
-          invoice: "Demo123",
+          invoice: item.invoice || '',
           orderId: item.orderId|| "",
           customer: item.customer?.name || "",
           totalAmount: item.totalAmount,
@@ -128,6 +128,12 @@ const BillingIndex = () => {
         cell: (_: Billing, index: number) => index + 1,
         sortable: false,
         width: "60px",
+    },
+        {
+        name: "Invoice",
+        selector: (row: Billing) => row.invoice,
+            sortable: true,
+            wrap: true
         },
         {
         name: "Order ID",
