@@ -51,7 +51,7 @@ const BillingIndex = () => {
         const formattedData = response.data.data.billings.map((item: any) => ({
           id: item._id,
           invoice: item.invoice || '',
-          orderId: item.orderId|| "",
+          orderId: item.serviceOrders.map((serviceOrder: any) => serviceOrder.orderId).join(', '),
           customer: item.customer?.name || "",
           totalAmount: item.totalAmount,
           paidAmount: item.paidAmount,

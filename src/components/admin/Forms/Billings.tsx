@@ -91,14 +91,26 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     if (initialData) {
       setValue('date', formatDateToYYYYMMDD(initialData.date || new Date()));
       setValue('orderId', initialData.orderId);
-      setValue('serviceOrders', initialData.serviceOrders);
+      const transformedServiceOrders = initialData.serviceOrders.map((order: any) => ({
+        _id: order.serviceOrder._id,
+        orderId: order.orderId,
+        order: order.order,
+        serviceCharge: order.serviceOrder?.serviceCharge,
+        // remainingBalance: order.remainingBalance || 0,
+        service: {
+          title: order.serviceOrder.service?.title || '',
+        },
+        status: order.serviceOrder?.status,
+        paymentStatus: order.serviceOrder?.paymentStatus,
+      }));
+
+      setValue('serviceOrders', transformedServiceOrders);
       const customer =
         typeof initialData?.customer === 'object'
           ? initialData?.customer?._id || ''
           : initialData?.customer || '';
       setValue('customer', customer);
-      // setServiceOrders(initialData.serviceOrders || []);
-      updateServiceOrders(initialData.serviceOrders || []);
+      updateServiceOrders(transformedServiceOrders || []);
     }
   }, [initialData, setValue]);
 
@@ -219,13 +231,11 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
   };
 
   const handleFormSubmit = async (data: BillingsFormData) => {
-    console.log(data.serviceOrders);
     if (!data.serviceOrders || data.serviceOrders.length === 0) {
       toast(<ErrorToast message="Service Orders cannot be empty." />);
       return;
     }
-    
-    console.log(data.serviceOrders);
+  
     const minimalServiceOrders = data.serviceOrders.map((order) => ({
       serviceOrder: order._id,
       orderId: order.orderId,
@@ -252,7 +262,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       <Card>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
-            {/* Service Date */}
+            {/*Billing Date */}
           <div className="mb-4">
               <Label htmlFor="date">Service Date<span className="text-red-400">*</span></Label>
               <Input
@@ -298,7 +308,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
                   <th className="border border-gray-300 px-4 py-2">Order ID</th>
                   <th className="border border-gray-300 px-4 py-2">Service</th>
                   <th className="border border-gray-300 px-4 py-2">Service Charge</th>
-                  <th className="border border-gray-300 px-4 py-2">Remaining Balance</th>
+                  {/* <th className="border border-gray-300 px-4 py-2">Remaining Balance</th> */}
                   <th className="border border-gray-300 px-4 py-2">Action</th>
                 </tr>
               </thead>
@@ -309,7 +319,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
                     <td className="border border-gray-300 px-4 py-2">{order.orderId}</td>
                     <td className="border border-gray-300 px-4 py-2">{order.service?.title}</td>
                     <td className="border border-gray-300 px-4 py-2">Rs.{order.serviceCharge}</td>
-                    <td className="border border-gray-300 px-4 py-2">Rs.{order.remainingBalance || 0}</td>
+                    {/* <td className="border border-gray-300 px-4 py-2">Rs.{order.remainingBalance || 0}</td> */}
                     <td className="border border-gray-300 px-4 py-2">
                       <Button variant="outline" onClick={() => handleServiceOrderRemove(order._id)}>
                         ✗
@@ -322,7 +332,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
                     Total
                   </td>
                   <td className="border border-gray-300 px-4 py-2">Rs.{watch('totalAmount') || 0}</td>
-                  <td className="border border-gray-300 px-4 py-2">Rs.{watch('remainingAmount') || 0}</td>
+                  {/* <td className="border border-gray-300 px-4 py-2">Rs.{watch('remainingAmount') || 0}</td> */}
                   <td className="border border-gray-300 px-4 py-2"></td>
                 </tr>
               </tbody>

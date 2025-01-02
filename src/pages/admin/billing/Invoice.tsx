@@ -97,21 +97,19 @@ const Invoice: React.FC<{ bill: any; }> = ({
             <thead>
               <tr className="border-b">
                 <th className="text-left py-2 px-4 font-semibold text-sm">Item</th>
-                <th className="text-left py-2 px-4 font-semibold text-sm">Quantity</th>
-                <th className="text-left py-2 px-4 font-semibold text-sm">Unit Price</th>
-                <th className="text-left py-2 px-4 font-semibold text-sm">Total</th>
+                <th className="text-left py-2 px-4 font-semibold text-sm">Unit</th>
+                <th className="text-left py-2 px-4 font-semibold text-sm">Price</th>                              
               </tr>
             </thead>
             <tbody>
               {/* Uncomment this block to dynamically render items */}
-              {/* {bill?.items?.map((item: any, index: number) => (
+              {bill?.serviceOrders?.map((item: any, index: number) => (
                 <tr key={index} className="border-b">
-                  <td className="py-2 px-4">{item.name}</td>
-                  <td className="py-2 px-4">{item.quantity}</td>
-                  <td className="py-2 px-4">${item.unitPrice.toFixed(2)}</td>
-                  <td className="py-2 px-4">${item.total.toFixed(2)}</td>
+                  <td className="py-2 px-4">{item.serviceOrder?.service?.title}</td>
+                  <td className="py-2 px-4">1</td>
+                  <td className="py-2 px-4">{item.serviceOrder?.serviceCharge}</td>
                 </tr>
-              ))} */}
+              ))}
             </tbody>
           </table>
 

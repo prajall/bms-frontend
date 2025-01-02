@@ -15,19 +15,23 @@ interface ServiceReference {
 }
 // Define the type for the form data
 interface BillingFormData {
-    // orderId: string;
-    // order: string;
+    date?: string;
+    order?: string;
     serviceOrder: string; 
     customer?: ServiceReference | string;
-    // date: string;
-    // status: string;
     totalAmount?: number;
     paidAmount?: number;
     totalPaid?: number;
-    // previousDue: number;
     remainingAmount?: number;
     orderId?: string;
+    discount?: number;
+    tax?: number;  
 }
+
+const formatDateToYYYYMMDD = (date: string | Date) => {
+  const d = new Date(date);
+  return d.toISOString().split('T')[0]; 
+};
 
 interface BillingProps {
   initialData?: BillingFormData;
@@ -37,18 +41,16 @@ interface BillingProps {
 const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<BillingFormData>({
         defaultValues: {
-            // orderId: '',
-            // order: '',
+            date: formatDateToYYYYMMDD(new Date()),
+            order: '',
             serviceOrder: '',
             customer: '',
-            // date: '',
-            // status: 'unpaid',
             totalAmount: 0,
             paidAmount: 0,
-            // totalPaid: 0,
-            // previousDue: 0,
             remainingAmount: 0,
             orderId: '',
+            discount: 0,  
+            tax: 0,     
             ...initialData,
         },
     });
@@ -93,6 +95,7 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
                 return; 
             }
             setValue("customer", fetchedServiceOrder.customer?._id || '');
+            setValue("order", fetchedServiceOrder.order || '')
             
             const totalPaidAmount = previousBillings.reduce((sum, billing) => {
                 return sum + (billing.paidAmount || 0); 
@@ -132,10 +135,20 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
     };
 
     const handleFormSubmit = async (data: BillingFormData) => {
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-            formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value.toString());
-        });
+         const formData = new FormData();
+        formData.append('date', data.date ? data.date : formatDateToYYYYMMDD(new Date()));
+        formData.append('customer', data.customer ? String(data.customer) : "");
+        formData.append('totalAmount', data.totalAmount !== undefined ? data.totalAmount.toString() : "0");
+        formData.append('paidAmount', data.paidAmount !== undefined ? data.paidAmount.toString() : "0");
+        formData.append('discount', data.discount !== undefined ? data.discount.toString() : "0");
+        formData.append('tax', data.tax !== undefined ? data.tax.toString() : "0");
+        const serviceOrders = [{
+            serviceOrder: data.serviceOrder,
+            orderId: data.orderId,  
+            order: data.order, 
+        }];
+        const serviceOrdersJson = JSON.stringify(serviceOrders);
+        formData.append('serviceOrders', serviceOrdersJson);
         onSubmit(formData);
     };
 
@@ -144,6 +157,7 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
             <Card>
                 <CardContent>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 my-4">
+                        
                         {/* Service Select */}
                         <div className="mb-4">
                             <Label htmlFor="order">Service Order</Label>
@@ -153,9 +167,23 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
                                 showAddServiceOrderButton={false}
                             /> */}
                             <Input type='hidden' id='serviceOrder' />
+                            <Input type='hidden' id='orderId' />
+                            <Input type='hidden' id='order' />
                             {orderId && <p className="text-orange-500 bold">{orderId}</p>}
                             {errors.serviceOrder && <p className="text-red-500 text-xs mt-1">{errors.serviceOrder.message}</p>}
                             {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
+                        </div>
+
+                        {/* Billing Date */}
+                        <div className="mb-4">
+                            <Label htmlFor="date">Service Date<span className="text-red-400">*</span></Label>
+                            <Input
+                                {...register("date", { required: "Service Date is required" })}
+                                id="date"
+                                type="date"
+                                placeholder="Select service date"
+                            />
+                            {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
                         </div>
 
                         {/* Customer Select */}
@@ -207,6 +235,18 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
                             {errors.remainingAmount && <p className="text-red-500 text-xs mt-1">{errors.remainingAmount.message}</p>}
                         </div>
 
+                        {/* Discount */}
+                        <div className="mb-4">
+                            <Label htmlFor="discount">Discount</Label>
+                            <Input
+                                {...register("discount", { required: "Discount amount is required" })}
+                                id="discount"
+                                type="number"
+                                placeholder="Discount Amount"
+                            />
+                            {errors.discount && <p className="text-red-500 text-xs mt-1">{errors.discount.message}</p>}
+                        </div>
+
                         {/* Service Charge */}
                         <div className="mb-4">
                             <Label htmlFor="totalAmount">Total Amount</Label>
@@ -218,10 +258,22 @@ const Billing: React.FC<BillingProps> = ({ initialData, onSubmit }) => {
                             />
                             {errors.totalAmount && <p className="text-red-500 text-xs mt-1">{errors.totalAmount.message}</p>}
                         </div>
+
+                        {/* Tax */}
+                        <div className="mb-4">
+                            <Label htmlFor="tax">Tax</Label>
+                            <Input
+                                {...register("tax", { required: "Tax amount is required" })}
+                                id="tax"
+                                type="number"
+                                placeholder="Tax Amount"
+                            />
+                            {errors.tax && <p className="text-red-500 text-xs mt-1">{errors.tax.message}</p>}
+                        </div>
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-center">
-                    <Button type="submit">{initialData ? "Update" : "Create"}</Button>
+                    <Button type="submit">Create</Button>
                 </CardFooter>
             </Card>
         </form>
