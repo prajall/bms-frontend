@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import TableLayout from "@/components/admin/TableLayout";
 import AddButton from "@/components/ui/buttons/AddButton";
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 import Invoice from "./Invoice";
+import { useReactToPrint, UseReactToPrintOptions } from "react-to-print";
 
 export type Billing = {
   id: string;
@@ -40,6 +41,8 @@ const BillingIndex = () => {
   const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [billToPrint, setBillToPrint] = useState<Billing | null>(null);
+
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   const fetchBillingData = async () => {
     try {
@@ -171,8 +174,16 @@ const BillingIndex = () => {
         },
   ];
 
+  const handlePrint = useReactToPrint({
+    invoiceRef,
+    documentTitle: "Service Invoice",
+  } as UseReactToPrintOptions);
+
   const printBill = (bill: Billing) => {
     setBillToPrint(bill);
+    setTimeout(() => {
+      handlePrint();
+    }, 0);
   };
   const createBilling = () => {
     navigate("/admin/billings/create");
@@ -213,7 +224,9 @@ const BillingIndex = () => {
       />
 
       {billToPrint && (
-        <Invoice bill={billToPrint}  />
+        <div style={{ display: "none" }}>
+          <Invoice bill={billToPrint} ref={invoiceRef} />
+        </div>
       )}
     </div>
   );

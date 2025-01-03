@@ -81,7 +81,23 @@ const menuItems = [
   { name: "Bookings", icon: Calendar, link: "/bookings" },
   // { name: "Orders", icon: ShoppingCart, link: "/orders" },
   { name: "Billings", icon: FileText, link: "/admin/billings" },
-  { name: "Reports", icon: BarChart2, link: "/reports" },
+  {
+    name: "Reports",
+    icon: BarChart2,
+    link: "#",
+    children: [
+      {
+        name: "Services Order",
+        link: "/admin/report/service-order",
+        title: "Reports"
+      },
+      {
+        name: "Service Billing",
+        link: "/admin/report/service-billing",
+        title: "Reports"
+      },
+    ],
+  },
   { name: "Templates", icon: FileIcon, link: "/templates" },
   { name: "Brand", icon: GitBranch, link: "/brand" },
   {

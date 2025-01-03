@@ -37,7 +37,7 @@ export interface ServiceOrderFormData {
     status?: string;
 }
 
-const statusOptions = [
+export const statusOptions = [
     { value: 'pending', label: 'Pending' },
     { value: 'completed', label: 'Completed' },
     { value: 'cancelled', label: 'Cancelled' },

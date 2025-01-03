@@ -33,7 +33,7 @@ const SelectCustomer: React.FC<SelectCustomerProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
 
-  const apiUrl = `${import.meta.env.VITE_API_URL}/customer`;
+  const apiUrl = `${import.meta.env.VITE_API_URL}/customer/mini-list`;
 
   // Fetch customers with optional search query
   const fetchCustomers = async (query: string = "") => {
