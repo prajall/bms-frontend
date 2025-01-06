@@ -24,8 +24,9 @@ interface RoleProps {
 
 const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
   const [permissions, setPermissions] = useState<Permission[]>(initialData?.permissions || []); 
-    const availableModules = ["category", "product", "part", "employee", "customer"];
-    const availableActions = ["view", "edit", "create", "delete"];
+  const availableModules = ["category", "product", "part", "employee", "customer", "pos", "service", "service_order", "role", "billing", "reports",];
+  const availableActions = ["view", "edit", "create", "delete"];
+  const reportTitles = ["Service Order Report", "Service Billing Report", "POS Report"]; 
 
   const {
     register,
@@ -40,24 +41,46 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
   useEffect(() => {
     if (initialData) {
       const mergedPermissions = availableModules.map((module) => {
-      const existingPermission = initialData.permissions.find(
-        (perm) => perm.module === module
-      );
-      return (
-        existingPermission || {
-          module,
-          actions: [], // Default to empty actions if not present in initialData
+        const existingPermission = initialData.permissions.find(
+          (perm) => perm.module === module
+        );
+          
+        if (module === "reports") {
+          const reportActions = existingPermission
+            ? existingPermission.actions
+            : []; 
+          return {
+            module,
+            actions: reportTitles.filter((report) =>
+              reportActions.includes(report)
+            ), 
+          };
         }
-      );
-    });
+          
+        return (
+          existingPermission || {
+            module,
+            actions: [], // Default to empty actions if not present in initialData
+          }
+        );
+      });
       setValue("name", initialData.name);
-      setPermissions(mergedPermissions || []);
-    } else {
-      // Ensure all modules are available with empty actions initially
-      const defaultPermissions = availableModules.map((module) => ({
-        module,
-        actions: [],
-      }));
+        console.log(mergedPermissions);
+        setPermissions(mergedPermissions || []);
+      } else {
+        // Ensure all modules are available with empty actions initially
+        const defaultPermissions = availableModules.map((module) => {
+          if (module === "reports") {
+            return {
+              module,
+              actions: [], 
+            };
+          }
+          return {
+            module,
+            actions: [],
+          };
+        });
       setPermissions(defaultPermissions);
     }
   }, [initialData, setValue]);
@@ -127,7 +150,7 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {permissions.map((permission) => (
+                  {/* {permissions.map((permission) => (
                     <tr key={permission.module}>
                       <td className="border border-gray-200 px-4 py-2">{permission.module}</td>
                       {availableActions.map((action) => (
@@ -145,7 +168,47 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
                         </td>
                       ))}
                     </tr>
-                  ))}
+                  ))} */}
+
+                  {permissions.map((permission) =>
+                    permission.module === "reports" ? (
+                      reportTitles.map((report) => (
+                        <tr key={`${permission.module}-${report}`}>
+                          <td className="border border-gray-200 px-4 py-2">{report}</td>
+                          <td
+                            colSpan={availableActions.length}
+                            className="border border-gray-200 px-4 py-2"
+                          >
+                            <Checkbox
+                              label={`Access ${report}`}
+                              checked={permission.actions.includes(report)}
+                              onChange={(isChecked) =>
+                                handleActionChange(permission.module, report, isChecked)
+                              }
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr key={permission.module}>
+                        <td className="border border-gray-200 px-4 py-2">{permission.module}</td>
+                        {availableActions.map((action) => (
+                          <td
+                            key={`${permission.module}-${action}`}
+                            className="border border-gray-200 px-4 py-2"
+                          >
+                            <Checkbox
+                              label=""
+                              checked={permission.actions.includes(action)}
+                              onChange={(isChecked) =>
+                                handleActionChange(permission.module, action, isChecked)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>

@@ -6,6 +6,7 @@ import { statusOptions } from '@/components/admin/Forms/ServiceOrder';
 import Select from "react-select";
 import { useReactToPrint, UseReactToPrintOptions } from 'react-to-print';
 import * as XLSX from 'xlsx';
+import ReportHeader from './ReportHeader';
 
 interface Customer {
   name: string;
@@ -138,7 +139,7 @@ const ServiceOrderReport: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">Service Order Report</h1>
 
       {/* Filters */}
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         <Input
           type="text"
           placeholder="Filter by Order ID"
@@ -204,11 +205,8 @@ const ServiceOrderReport: React.FC = () => {
             />
             <span>No</span>
             </label>
-        </div>      
-
-          </div>
-
-          {/* Actions */}
+        </div>  
+        {/* Actions */}
       <div className="flex justify-end mb-4 space-x-4">
         <button
           onClick={exportToExcel}
@@ -222,20 +220,17 @@ const ServiceOrderReport: React.FC = () => {
         >
           Print
         </button>
-          </div>
-          
-          <div ref={contentRef}>
-          
-          {/* Report Header */}
-      <div className="mb-4 text-center">
-        <h1 className="text-3xl font-bold">Company Name</h1>
-        <p className="text-sm">Contact: +1 123-456-7890 | Email: info@company.com</p>
-        <p className="text-sm">Address: 123 Main Street, City, Country</p>
       </div>
 
+      </div>
+          
+      <div ref={contentRef}>
+          
+      {/* Report Header */}
+        <ReportHeader title={"Service Order Report"} />
+
       {/* Filter Information */}
-      <div className="mb-4 bg-gray-100 p-4 rounded-md shadow">
-        <h2 className="font-semibold text-lg mb-2">Applied Filters:</h2>
+      {/* <div className="mb-4 bg-gray-100 p-4 rounded-md">
         <ul className="list-disc ml-4">
           {filters.customer && <li>Customer Name: {filters.customer}</li>}
           {filters.startDate && <li>Start Date: {formatDate(filters.startDate)}</li>}
@@ -245,7 +240,7 @@ const ServiceOrderReport: React.FC = () => {
             <li>Is Recurring: {filters.isRecurring === 'true' ? 'Yes' : 'No'}</li>
           )}
         </ul>
-      </div>
+      </div> */}
 
       {/* Orders Table */}
       {data ? (

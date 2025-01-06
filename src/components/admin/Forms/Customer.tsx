@@ -25,6 +25,7 @@ interface CustomerFormData {
   phoneNo: string;
   mobileNo1: string;
   mobileNo2: string;
+  user?: any;
 }
 
 interface CustomerProps {
@@ -79,6 +80,8 @@ const Customer: React.FC<CustomerProps> = ({ initialData, onSubmit }) => {
       Object.keys(initialData).forEach((key) => {
         setValue(key as keyof CustomerFormData, (initialData as any)[key]);
       });
+      setValue('email', initialData?.user?.email || '');
+      setValue('password', initialData?.user?.password || '');
     }
   }, [initialData, setValue]);
 

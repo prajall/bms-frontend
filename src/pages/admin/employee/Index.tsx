@@ -39,7 +39,7 @@ const EmployeeIndex = () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/employee`,
-            { params: { page, limit, sortField, sortOrder, search }, }
+            { params: { page, limit, sortField, sortOrder, search }, withCredentials: true, }
       );
       if (response.status === 200 && response.data.success) {
         const formattedData = response.data.data.employees.map(

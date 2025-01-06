@@ -68,6 +68,7 @@ const BusinessConfigurationPage: React.FC = () => {
         { label: "Phone", key: "phone" },
         { label: "Email", key: "email" },
         { label: "Currency", key: "currency" },
+        { label: "Currency Symbol", key: "currencySymbol"},
         { label: "Logo", key: "logo", isImage: true },
         { label: "Favicon", key: "favicon", isImage: true },
       ].map(({ label, key, isImage }) => (
@@ -150,6 +151,7 @@ const BusinessConfigurationPage: React.FC = () => {
       "logo",
       "favicon",
       "currency",
+      "currencySymbol",
       "passwordVerification",
     ];
 

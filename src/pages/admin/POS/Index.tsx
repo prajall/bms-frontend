@@ -156,23 +156,40 @@ export default function POSPage() {
       return;
     }
     console.log(cartItems);
-    const products = cartItems.filter((item) => (item.type = "product"));
-    const parts = cartItems.filter((item) => (item.type = "part"));
+    // const products = cartItems.filter((item) => (item.type = "product"));
+    // const parts = cartItems.filter((item) => (item.type = "part"));
+     const products = cartItems
+      .filter((item) => item.type === "product")
+      .map((product) => ({
+        product: product._id,
+        quantity: product.quantity,
+        price: product.sellingPrice,
+      }));
+
+    const parts = cartItems
+      .filter((item) => item.type === "part")
+      .map((part) => ({
+        part: part._id,
+        quantity: part.quantity,
+        price: part.sellingPrice,
+    }));
     const data = {
-      products: products.map((product) => {
-        return {
-          product: product._id,
-          quantity: product.quantity,
-          price: product.sellingPrice,
-        };
-      }),
-      parts: parts.map((part) => {
-        return {
-          partId: part._id,
-          quantity: part.quantity,
-          price: part.sellingPrice,
-        };
-      }),
+      // products: products.map((product) => {
+      //   return {
+      //     product: product._id,
+      //     quantity: product.quantity,
+      //     price: product.sellingPrice,
+      //   };
+      // }),
+      // parts: parts.map((part) => {
+      //   return {
+      //     part: part._id,
+      //     quantity: part.quantity,
+      //     price: part.sellingPrice,
+      //   };
+      // }),
+      products,
+      parts,
       customerType:
         selectedCustomer === "67554286140992b96228ae97"
           ? "walking"
@@ -189,7 +206,6 @@ export default function POSPage() {
         `${import.meta.env.VITE_API_URL}/pos`,
         data
       );
-      console.log(response);
       if (response.status === 201 && response.data.success) {
         toast.success("Order Created Successfully");
         handleEmptyCart();
@@ -229,7 +245,7 @@ export default function POSPage() {
             <TabsList className="flex justify-start">
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="parts">Parts</TabsTrigger>
-              <TabsTrigger value="installation">Installation</TabsTrigger>
+              {/* <TabsTrigger value="installation">Installation</TabsTrigger> */}
             </TabsList>
           </Tabs>
 

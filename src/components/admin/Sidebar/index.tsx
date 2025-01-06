@@ -93,7 +93,12 @@ const menuItems = [
       },
       {
         name: "Service Billing",
-        link: "/admin/report/service-billing",
+        link: "/admin/report/billing",
+        title: "Reports"
+      },
+      {
+        name: "POS",
+        link: "/admin/report/pos",
         title: "Reports"
       },
     ],

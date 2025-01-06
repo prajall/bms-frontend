@@ -48,6 +48,8 @@ import EditBilling from "@/pages/admin/billing/Edit";
 
 // reports
 import ServiceOrderReport from "@/pages/admin/reports/ServiceOrderReport";
+import BillingReport from "@/pages/admin/reports/BillingReport";
+import POSReport from "@/pages/admin/reports/POSReport";
 
 import SystemConfigurationPage from "@/pages/admin/configs/System";
 import BusinessConfigurationPage from "@/pages/admin/configs/Business";
@@ -345,6 +347,28 @@ const AppRouter: React.FC = () => {
             <PrivateRoute>
               <AdminLayout>
                 <ServiceOrderReport />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/report/billing"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <BillingReport />
+              </AdminLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/report/pos"
+          element={
+            <PrivateRoute>
+              <AdminLayout>
+                <POSReport />
               </AdminLayout>
             </PrivateRoute>
           }

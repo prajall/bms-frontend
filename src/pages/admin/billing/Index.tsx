@@ -174,16 +174,30 @@ const BillingIndex = () => {
         },
   ];
 
+  // useEffect(() => {
+  //   if (billToPrint) {
+  //     handlePrint();
+  //   }
+  // }, [billToPrint]);
+
+
   const handlePrint = useReactToPrint({
     invoiceRef,
     documentTitle: "Service Invoice",
+    onAfterPrint: async () => {
+      console.log("Print completed");
+    },
+    onBeforePrint: async () => {
+      console.log("Preparing to print...");
+    }
   } as UseReactToPrintOptions);
 
   const printBill = (bill: Billing) => {
     setBillToPrint(bill);
-    setTimeout(() => {
-      handlePrint();
-    }, 0);
+    handlePrint()
+    // setTimeout(() => {
+    //   handlePrint();
+    // }, 0);
   };
   const createBilling = () => {
     navigate("/admin/billings/create");
@@ -224,8 +238,8 @@ const BillingIndex = () => {
       />
 
       {billToPrint && (
-        <div style={{ display: "none" }}>
-          <Invoice bill={billToPrint} ref={invoiceRef} />
+        <div style={{ position: "absolute", top: "-9999px", left: "-9999px" }}>
+          <Invoice ref={invoiceRef} bill={billToPrint} />
         </div>
       )}
     </div>
