@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import usePermission from "@/hooks/usePermission";
 
 type Category = {
   id: string;
@@ -25,6 +26,9 @@ type Category = {
 };
 
 const ProductCategoryIndex = () => {
+  const canCreateCategory = usePermission("category", "create");
+  const canEditCategory = usePermission("category", "edit");
+  const canDeleteCategory = usePermission("category", "delete");
   const [categoryData, setCategoryData] = useState<Category[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -132,8 +136,12 @@ const ProductCategoryIndex = () => {
       cell: (row: Category) => (
         <div className="inline-flex space-x-2">
           {/* <ShowIcon link={`/admin/category/show/${row.id}`} /> */}
-          <EditIcon link={`/admin/category/edit/${row.id}`} />
-          <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          {canEditCategory && (
+            <EditIcon link={`/admin/category/edit/${row.id}`} />
+          )}
+           {canDeleteCategory && (
+              <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+            )}
         </div>
       ),
       sortable: false,
@@ -161,7 +169,7 @@ const ProductCategoryIndex = () => {
           </span>
           <Input className="pl-10 w-[300px] md:w-[400px]" placeholder="Search Category" />
         </div>
-        <AddButton title="Add Category" onClick={handleOpenModal} />
+        {canCreateCategory && <AddButton title="Add Category" onClick={handleOpenModal} />}
       </div>
       {errorMessage && (
         <div className="alert alert-error">

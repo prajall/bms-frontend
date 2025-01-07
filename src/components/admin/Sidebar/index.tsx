@@ -19,6 +19,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import Logo from "../../../assets/images/logo.png";
 import SidebarLinkGroup from "./SidebarLinkGroup";
 import { useBusinessConfig } from "@/hooks/useBusinessConfig";
+import usePermission from "@/hooks/usePermission";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -27,22 +28,24 @@ interface SidebarProps {
 
 const menuItems = [
   {
-    name: "Dashboard",
-    icon: Home,
-    link: "/admin",
-    title: "Dashboard",
+      name: "Dashboard",
+      icon: Home,
+      link: "/admin",
+      title: "Dashboard",
+      module: "dashboard",
+      action: "view"
   },
   {
     name: "Items",
     icon: Grid,
     link: "#",
     children: [
-      { name: "Category", link: "/admin/category", title: "Items-Category" },
-      { name: "Product", link: "/admin/products", title: "Items-Products" },
-      { name: "Parts", link: "/admin/parts", title: "Items-Parts" },
+      { name: "Category", link: "/admin/category", title: "Items-Category", module: "category", action: "view" },
+      { name: "Product", link: "/admin/products", title: "Items-Products", module: "product", action: "view" },
+      { name: "Parts", link: "/admin/parts", title: "Items-Parts", module: "part", action: "view" },
     ],
   },
-  { name: "POS", icon: DollarSign, link: "/admin/pos", title: "Point of Sale" },
+  { name: "POS", icon: DollarSign, link: "/admin/pos", title: "Point of Sale", module: "pos", action: "view" },
   {
     name: "Users",
     icon: Users,
@@ -52,11 +55,15 @@ const menuItems = [
         name: "Customers",
         link: "/admin/customers",
         title: "Customers Management",
+        module: "customer",
+        action: "view"
       },
       {
         name: "Employee",
         link: "/admin/employees",
         title: "Employee Management",
+        module: "employee",
+        action: "view"
       },
     ],
   },
@@ -68,19 +75,23 @@ const menuItems = [
       {
         name: "Services",
         link: "/admin/service",
-        title: "Service Management"
+        title: "Service Management",
+        module: "service",
+        action: "view"
       },
       {
         name: "Service Orders",
         link: "/admin/service_order",
-        title: "Service Management"
+        title: "Service Management",
+        module: "service_order",
+        action: "view"
       },
     ],
   },
-  { name: "Roles and Permission", icon: Shield, link: "/admin/roles" },
-  { name: "Bookings", icon: Calendar, link: "/bookings" },
+  { name: "Roles and Permission", icon: Shield, link: "/admin/roles", module: "role", action: "view" },
+  // { name: "Bookings", icon: Calendar, link: "/bookings", module: "category", action: "view" },
   // { name: "Orders", icon: ShoppingCart, link: "/orders" },
-  { name: "Billings", icon: FileText, link: "/admin/billings" },
+  { name: "Billings", icon: FileText, link: "/admin/billings", module: "billing", action: "view" },
   {
     name: "Reports",
     icon: BarChart2,
@@ -89,22 +100,28 @@ const menuItems = [
       {
         name: "Services Order",
         link: "/admin/report/service-order",
-        title: "Reports"
+        title: "Reports",
+        module: "reports",
+        action: "service_order_report"
       },
       {
         name: "Service Billing",
         link: "/admin/report/billing",
-        title: "Reports"
+        title: "Reports",
+        module: "reports",
+        action: "service_billing_report"
       },
       {
         name: "POS",
         link: "/admin/report/pos",
-        title: "Reports"
+        title: "Reports",
+        module: "reports",
+        action: "POS_report"
       },
     ],
   },
-  { name: "Templates", icon: FileIcon, link: "/templates" },
-  { name: "Brand", icon: GitBranch, link: "/brand" },
+  { name: "Templates", icon: FileIcon, link: "/admin/templates", module: "templates", action: "view" },
+  // { name: "Brand", icon: GitBranch, link: "/brand" },
   {
     name: "Configuration",
     icon: Settings,
@@ -114,11 +131,15 @@ const menuItems = [
         name: "Business",
         link: "/admin/business_config",
         title: "Configuration",
+        module: "business_config",
+        action: "view"
       },
       {
         name: "System",
         link: "/admin/system_config",
         title: "Configuration",
+        module: "system_config",
+        action: "view"
       },
     ],
   },
@@ -161,6 +182,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     };
     document.addEventListener("keydown", keyHandler);
     return () => document.removeEventListener("keydown", keyHandler);
+  });
+
+  // Filter menu items based on permissions
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.children) {
+      item.children = item.children.filter((child) =>
+        usePermission(child.module, child.action)
+      );
+      return item.children.length > 0;
+    }
+    return usePermission(item.module, item.action);
   });
 
   useEffect(() => {
@@ -220,7 +252,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           {/* <!-- Menu Group --> */}
           <div>
             <ul className="mb-6 flex flex-col gap-1.5">
-              {menuItems.map((item) => {
+              {filteredMenuItems.map((item) => {
                 if (item.children) {
                   // Handle dropdown menu
                   return (

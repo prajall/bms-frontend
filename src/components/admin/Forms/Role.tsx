@@ -24,9 +24,9 @@ interface RoleProps {
 
 const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
   const [permissions, setPermissions] = useState<Permission[]>(initialData?.permissions || []); 
-  const availableModules = ["category", "product", "part", "employee", "customer", "pos", "service", "service_order", "role", "billing", "reports",];
+  const availableModules = ["dashboard", "category", "product", "part", "employee", "customer", "pos", "service", "service_order", "role", "billing", "reports", "business_config", "templates"];
   const availableActions = ["view", "edit", "create", "delete"];
-  const reportTitles = ["Service Order Report", "Service Billing Report", "POS Report"]; 
+  const reportTitles = ["service_order_report", "service_billing_report", "POS_report"]; 
 
   const {
     register,
@@ -170,25 +170,33 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
                     </tr>
                   ))} */}
 
-                  {permissions.map((permission) =>
+                 {permissions.map((permission) =>
                     permission.module === "reports" ? (
-                      reportTitles.map((report) => (
-                        <tr key={`${permission.module}-${report}`}>
-                          <td className="border border-gray-200 px-4 py-2">{report}</td>
-                          <td
-                            colSpan={availableActions.length}
-                            className="border border-gray-200 px-4 py-2"
-                          >
-                            <Checkbox
-                              label={`Access ${report}`}
-                              checked={permission.actions.includes(report)}
-                              onChange={(isChecked) =>
-                                handleActionChange(permission.module, report, isChecked)
-                              }
-                            />
-                          </td>
-                        </tr>
-                      ))
+                      reportTitles.map((report) => {
+                        // Format report title for display
+                        const displayTitle = report
+                          .split("_") 
+                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) 
+                          .join(" "); 
+
+                        return (
+                          <tr key={`${permission.module}-${report}`}>
+                            <td className="border border-gray-200 px-4 py-2">{displayTitle}</td>
+                            <td
+                              colSpan={availableActions.length}
+                              className="border border-gray-200 px-4 py-2"
+                            >
+                              <Checkbox
+                                label=""
+                                checked={permission.actions.includes(report)} 
+                                onChange={(isChecked) =>
+                                  handleActionChange(permission.module, report, isChecked) 
+                                }
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr key={permission.module}>
                         <td className="border border-gray-200 px-4 py-2">{permission.module}</td>

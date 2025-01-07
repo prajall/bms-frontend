@@ -90,7 +90,7 @@ const LoginPage = () => {
         <div className="hidden md:block absolute w-[600px] bottom-0 right-0">
           <img className="w-full" src={rb47921} alt="" />
         </div>
-        <div className="border mt-4 rounded-xl w-full max-w-96 sm:max-w-fit sm:w-fit py-4 p-2 md:p-6 bg-white shadow-custom-lg">
+        <div className="border mt-4 rounded-xl w-full max-w-96 sm:max-w-fit sm:w-fit py-4 p-2 md:p-6 bg-background text-foreground shadow-custom-lg">
           <h3 className="text-3xl mb-2 text-green font-bold text-center ">
             Welcome Back,
           </h3>
@@ -106,7 +106,7 @@ const LoginPage = () => {
                   required: "Email is Required",
                 })}
                 placeholder="email@example.com"
-                className="p-3 text-sm w-full mt-1  ring-1 ring-[#000] ring-opacity-20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green focus:border-transparent"
+                className="p-3 text-sm w-full mt-1  ring-1 ring-[#000] ring-opacity-20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green focus:border-transparent dark:ring-opacity-60 dark:ring-neutral-500 dark:bg-neutral-800 dark:text-white dark:placeholder-gray-400"
                 type="email"
               />
               {errors.email && (
@@ -127,7 +127,7 @@ const LoginPage = () => {
                 })}
                 type="password"
                 placeholder="xxxxxxxx"
-                className="p-3 text-sm w-full mt-1  ring-1 ring-[#000] ring-opacity-20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green focus:border-transparent"
+                className="p-3 text-sm w-full mt-1  ring-1 ring-[#000] ring-opacity-20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green focus:border-transparent dark:ring-opacity-60 dark:ring-neutral-500 dark:bg-neutral-800 dark:text-white dark:placeholder-gray-400"
               />
               {errors.password && (
                 <p className="text-red-600 text-sm mt-1 ">

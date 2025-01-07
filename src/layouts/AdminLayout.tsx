@@ -2,10 +2,24 @@ import React, { useState, ReactNode } from "react";
 import { useLocation } from "react-router-dom"; // Import useRouter
 import Header from "@/components/admin/Header";
 import Sidebar from "@/components/admin/Sidebar";
+import { Navigate } from "react-router-dom";
+import usePermission from "@/hooks/usePermission";
 
-const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface AdminLayoutProps {
+  children: ReactNode;
+  module: string;
+  action: string;
+}
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({children,module,action,}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation(); // Get the current location
+
+  const hasAccess = usePermission(module, action);
+
+  if (!hasAccess) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   // Determine if the current route is /admin/pos
   const isPosRoute = location.pathname === "/admin/pos";

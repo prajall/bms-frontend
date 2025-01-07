@@ -25,6 +25,7 @@ interface EmployeeFormData {
     image: string;
     address: Address;
     contactNo: string;
+    user?: any;
 }
 
 interface EmployeeProps {
@@ -66,6 +67,8 @@ const Employee: React.FC<EmployeeProps> = ({ initialData, onSubmit }) => {
       Object.keys(initialData).forEach((key) => {
         setValue(key as keyof EmployeeFormData, (initialData as any)[key]);
       });
+      setValue('email', initialData?.user?.email || '');
+      setValue('password', initialData?.user?.password || '');
     }
   }, [initialData, setValue]);
     
@@ -102,7 +105,7 @@ const Employee: React.FC<EmployeeProps> = ({ initialData, onSubmit }) => {
         formData.append("name", data.name.trim());
         formData.append("email", data.email.trim());
         formData.append("password", data.password.trim());
-        formData.append("status", selectedRole.trim());
+        formData.append("role", selectedRole.trim());
         formData.append("gender", data.gender.trim());
         formData.append("department", data.department.trim());
         formData.append("contactNo", data.contactNo.trim());
