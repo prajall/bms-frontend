@@ -1,4 +1,4 @@
-import React, { useState, ReactNode } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { useLocation } from "react-router-dom"; // Import useRouter
 import Header from "@/components/admin/Header";
 import Sidebar from "@/components/admin/Sidebar";
@@ -11,10 +11,9 @@ interface AdminLayoutProps {
   action: string;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({children,module,action,}) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({children,module= "dashboard", action = "view",}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation(); // Get the current location
-
   const hasAccess = usePermission(module, action);
 
   if (!hasAccess) {

@@ -7,6 +7,7 @@ import {
   EditIcon,
   ShowIcon,
 } from "@/components/ui/buttons/IconBtn";
+import usePermission from "@/hooks/usePermission";
 import Modal from "@/components/ui/Model";
 import AddProduct from "./Create";
 import { toast } from "react-toastify";
@@ -33,6 +34,9 @@ const ProductIndex = () => {
   const [sortOrder, setSortOrder] = useState("");
   const [search, setSearch] = useState("");
 
+  const canCreateProduct = usePermission("product", "create");
+  const canEditProduct = usePermission("product", "edit");
+  const canDeleteProduct = usePermission("product", "delete");
 
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -168,8 +172,12 @@ const ProductIndex = () => {
       cell: (row: Product) => (
         <div className="inline-flex space-x-2">
           <ShowIcon link={`/admin/product/show/${row.id}`} />
-          <EditIcon link={`/admin/products/edit/${row.id}`} />
-          <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          {canEditProduct && (
+            <EditIcon link={`/admin/products/edit/${row.id}`} />
+          )}
+          {canDeleteProduct && (
+            <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          )}
         </div>
       ),
       width: "10%",
@@ -188,8 +196,10 @@ const ProductIndex = () => {
   return (
     <div className="relative">
       {/* <Breadcrumb pageName="Product List" /> */}
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Product" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateProduct && (
+          <AddButton title="Add Product" onClick={handleOpenModal} />
+        )}
       </div>
 
       {errorMessage && (

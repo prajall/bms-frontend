@@ -190,11 +190,15 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     const totalPaid = Number(watch('paidAmount')) || 0;
     const previousPaid = Number(watch('previousPaidAmount')) || 0;
     const totalAmount = Number(watch('totalAmount')) || 0;
-    const discount = Number(watch('discount')) || 0;
-    const tax = Number(watch('tax')) || 0;
+    const discountPercentage = Number(watch('discount')) || 0;
+    const taxPercentage = Number(watch('tax')) || 0;
 
-    const remainingAmount = totalAmount - (previousPaid + totalPaid);
-    const finalTotal = Math.max(remainingAmount - discount + tax, 0);
+    const discountAmount = (totalAmount * discountPercentage) / 100;
+    const taxableAmount = totalAmount - discountAmount; 
+    const taxAmount = (taxableAmount * taxPercentage) / 100;
+
+    const remainingAmount = taxableAmount + taxAmount - (previousPaid + totalPaid);
+    const finalTotal = Math.max(taxableAmount + taxAmount, 0);
 
     setValue('remainingAmount', remainingAmount > 0 ? remainingAmount : 0);
     setValue('finalTotal', finalTotal);
@@ -342,6 +346,20 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
           {/* Paid and Remaining Amount */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="mb-4">
+              <Label htmlFor="discount">Discount(%)</Label>
+              <Input {...register('discount')} id="discount" type="number" placeholder="Enter Discount" />
+            </div>
+
+            <div className="mb-4">
+              <Label htmlFor="tax">Tax(%)</Label>
+              <Input {...register('tax')} id="tax" type="number" placeholder="Enter Tax" />
+            </div>
+
+            <div className="mb-4">
+              <Label htmlFor="finalTotal">Final Total</Label>
+              <Input {...register('finalTotal')} id="finalTotal" type="number" readOnly />
+            </div>
+            <div className="mb-4">
               <Label htmlFor="paidAmount">Paid Amount</Label>
               <Input
                 {...register('paidAmount', { required: 'Paid amount is required' })}
@@ -355,21 +373,6 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
             <div className="mb-4">
               <Label htmlFor="remainingAmount">Remaining Amount</Label>
               <Input {...register('remainingAmount')} id="remainingAmount" type="number" readOnly />
-            </div>
-
-            <div className="mb-4">
-              <Label htmlFor="discount">Discount</Label>
-              <Input {...register('discount')} id="discount" type="number" placeholder="Enter Discount" />
-            </div>
-
-            <div className="mb-4">
-              <Label htmlFor="tax">Tax</Label>
-              <Input {...register('tax')} id="tax" type="number" placeholder="Enter Tax" />
-            </div>
-
-            <div className="mb-4">
-              <Label htmlFor="finalTotal">Final Total</Label>
-              <Input {...register('finalTotal')} id="finalTotal" type="number" readOnly />
             </div>
           </div>
         </CardContent>

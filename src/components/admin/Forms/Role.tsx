@@ -56,6 +56,13 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
             ), 
           };
         }
+
+        if (module === "dashboard") {
+          return {
+            module,
+            actions: ["view"],
+          };
+        }
           
         return (
           existingPermission || {
@@ -65,11 +72,17 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
         );
       });
       setValue("name", initialData.name);
-        console.log(mergedPermissions);
         setPermissions(mergedPermissions || []);
       } else {
         // Ensure all modules are available with empty actions initially
-        const defaultPermissions = availableModules.map((module) => {
+      const defaultPermissions = availableModules.map((module) => {
+          if (module === "dashboard") {
+            return {
+              module,
+              actions: ["view"], 
+            };
+          }
+        
           if (module === "reports") {
             return {
               module,
@@ -150,27 +163,9 @@ const Role: React.FC<RoleProps> = ({ initialData, onSubmit }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* {permissions.map((permission) => (
-                    <tr key={permission.module}>
-                      <td className="border border-gray-200 px-4 py-2">{permission.module}</td>
-                      {availableActions.map((action) => (
-                        <td
-                          key={`${permission.module}-${action}`}
-                          className="border border-gray-200 px-4 py-2"
-                        >
-                          <Checkbox
-                            label=""
-                            checked={permission.actions.includes(action)}
-                            onChange={(isChecked) =>
-                              handleActionChange(permission.module, action, isChecked)
-                            }
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))} */}
-
-                 {permissions.map((permission) =>
+                  {permissions
+                    .filter((permission) => permission.module !== "dashboard")
+                    .map((permission) =>
                     permission.module === "reports" ? (
                       reportTitles.map((report) => {
                         // Format report title for display

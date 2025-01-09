@@ -11,8 +11,7 @@ import {
 import AddEmployee from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import usePermission from "@/hooks/usePermission";
 
 type Employee = {
   id: string;
@@ -22,6 +21,7 @@ type Employee = {
   gender: string;
   address: string;
   phoneNo: string;
+  role: string;
 };
 
 const EmployeeIndex = () => {
@@ -34,6 +34,9 @@ const EmployeeIndex = () => {
   const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const canCreateEmployee = usePermission("employee", "create");
+  const canEditEmployee = usePermission("employee", "edit");
 
   const fetchEmployeeData = async () => {
     try {
@@ -50,6 +53,7 @@ const EmployeeIndex = () => {
             image: employee.image || "",
             address: `${employee.address.addressLine}, ${employee.address.city}, ${employee.address.province}, ${employee.address.country}`,
             phoneNo: employee.contactNo,
+            role: employee.role?.name,
           })
         );
         setEmployeeData(formattedData);
@@ -141,6 +145,12 @@ const EmployeeIndex = () => {
       wrap: true,
     },
     {
+      name: "Role",
+      selector: (row: Employee) => row.role,
+      sortable: true,
+      wrap: true,
+    },
+    {
       name: "Gender",
       selector: (row: Employee) => row.gender,
       sortable: true,
@@ -157,7 +167,9 @@ const EmployeeIndex = () => {
       cell: (row: Employee) => (
         <div className="inline-flex space-x-2">
           <ShowIcon link={`/admin/employee/show/${row.id}`} />
-          <EditIcon link={`/admin/employee/edit/${row.id}`} />
+          {canEditEmployee && (
+            <EditIcon link={`/admin/employee/edit/${row.id}`} />
+          )}
           {/* <DeleteIcon onClick={() => handleAction('delete', row.id)} /> */}
         </div>
       ),
@@ -175,8 +187,11 @@ const EmployeeIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Employee" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateEmployee && (
+          <AddButton title="Add Employee" onClick={handleOpenModal} />
+        )}
+        
       </div>
       {errorMessage && (
         <div className="alert alert-error">

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { hasPermission } from "@/utils/permissions";
@@ -12,12 +13,14 @@ const usePermission = (module: string, action: string): boolean => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   // Super admin has all permissions
-  if (user?.type === "super_admin") {
-    return true;
-  }
+  const hasAccess = useMemo(() => {
+    if (user?.type === "super_admin") {
+      return true;
+    }
+    return hasPermission(user, module, action);
+  }, [user, module, action]);
 
-  // Check permissions for other users
-  return hasPermission(user, module, action);
+  return hasAccess;
 };
 
 export default usePermission;

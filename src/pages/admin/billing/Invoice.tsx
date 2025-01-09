@@ -1,10 +1,32 @@
 import React, { forwardRef } from "react";
+import { useBusinessConfig } from "@/hooks/useBusinessConfig";
 
 type InvoiceProps = {
   bill: any; 
 };
 
 const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ bill }, ref) => {
+  const { businessConfig, loading } = useBusinessConfig();
+  console.log(bill);
+  const businessLogo = businessConfig?.logo || "";
+  const symbol = businessConfig?.currencySymbol || "Rs."
+
+  const subtotal = bill?.totalAmount || 0;
+
+  // Calculate discount amount
+  const discountAmount = (subtotal * (bill?.discount || 0)) / 100;
+
+  // Calculate total after discount
+  const totalAfterDiscount = subtotal - discountAmount;
+
+  // Calculate tax amount
+  const taxAmount = (totalAfterDiscount * (bill?.tax || 0)) / 100;
+
+  // Final total after tax
+  const totalAmtAfterTax = totalAfterDiscount + taxAmount;
+
+  // Calculate balance due
+  const balanceDue = totalAmtAfterTax - (bill?.totalPaid || 0);
   return (
     <div>
 
@@ -12,10 +34,17 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ bill }, ref) => {
       <div ref={ref}>
         <div className="max-w-3xl mx-auto p-6 bg-white shadow-md">
           {/* Header Section */}
+          <div>
+            {!loading && businessLogo ? (
+            <img src={businessLogo} alt="Logo" className="mx-auto h-10" />
+          ) : (
+            <span></span>
+          )}
+          </div>
           <div className="flex justify-between items-center border-b pb-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold">INVOICE</h1>
-              <p className="text-sm text-gray-500">Invoice No: {bill?.invoice}</p>
+              <p className="text-sm text-gray-500">Invoice No: <strong>{bill?.invoice}</strong></p>
               <p className="text-sm text-gray-500">Date: {bill?.date}</p>
             </div>
             <div className="text-right">
@@ -40,7 +69,7 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ bill }, ref) => {
                 <tr key={index} className="border-b">
                   <td className="py-2 px-4">{item.serviceOrder?.service?.title}</td>
                   <td className="py-2 px-4">1</td>
-                  <td className="py-2 px-4">${item.serviceOrder?.serviceCharge}</td>
+                  <td className="py-2 px-4">{ symbol } {item.serviceOrder?.serviceCharge}</td>
                 </tr>
               ))}
             </tbody>
@@ -51,17 +80,33 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ bill }, ref) => {
             <div>
               <div className="flex justify-between">
                 <span className="font-semibold text-sm">Subtotal:</span>
-                <span>${bill?.subtotal || 0}</span>
+                <span>{ symbol } {(bill.totalAmount || subtotal).toFixed(2)}</span>
               </div>
               <div className="flex justify-between mt-2">
                 <span className="font-semibold text-sm">
-                  Tax (${bill?.taxRate || 0}%):
+                  Discount ({bill?.discount || 0}%):
                 </span>
-                <span>${bill?.tax || 0}</span>
+                <span>- { symbol } {discountAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="font-semibold text-sm">Total After Discount:</span>
+                <span>{ symbol } {totalAfterDiscount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="font-semibold text-sm">Tax ({bill?.tax || 0}%):</span>
+                <span>{ symbol } {taxAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between mt-2 border-t border-black pt-2">
-                <span className="font-bold text-lg">Total Due:</span>
-                <span className="font-bold text-lg">${bill?.totalDue}</span>
+                <span className="font-bold text-lg">Final Total:</span>
+                <span className="font-bold text-lg">{ symbol } {bill.finalTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="font-semibold text-sm">Amount Paid:</span>
+                <span>{ symbol } {bill?.totalPaid.toFixed(2) || 0}</span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="font-semibold text-sm">Balance Due:</span>
+                <span>{ symbol } {balanceDue.toFixed(2)}</span>
               </div>
             </div>
           </div>

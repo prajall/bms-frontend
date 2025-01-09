@@ -17,6 +17,7 @@ import ServiceBilling from "./Billing";
 import ReOrder from "./Reorder";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
+import usePermission from "@/hooks/usePermission";
 
 type ServiceOrder = {
   id: string;
@@ -46,6 +47,11 @@ const ServiceOrderIndex = () => {
   const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
   const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+  const canCreateServiceOrder = usePermission("service_order", "create");
+  const canEditServiceOrder = usePermission("service_order", "edit");
+  const canDeleteServiceOrder = usePermission("service_order", "delete");
+  const canCreateBilling = usePermission("billing", "create");
 
   const fetchServiceOrder = async () => {
     try {
@@ -252,13 +258,19 @@ const ServiceOrderIndex = () => {
         cell: (row: ServiceOrder) => (
           <div className="inline-flex space-x-2">      
             <ShowIcon link={`/admin/service_order/show/${row.id}`} />
-            <EditIcon link={`/admin/service_order/edit/${row.id}`} />
-            <ReOrderIcon  onClick={() => handleReOrder(row.id)}/>
-            <DeleteIcon onClick={() => handleAction("delete", row.id)} />
-            {row.paymentStatus !== 'paid' ? (
+            {canEditServiceOrder && (
+              <EditIcon link={`/admin/service_order/edit/${row.id}`} />
+            )}
+            {canCreateServiceOrder && (
+              <ReOrderIcon onClick={() => handleReOrder(row.id)} />
+            )}
+            {canDeleteServiceOrder && (
+              <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+            )}
+            {canCreateBilling && row.paymentStatus !== 'paid' ? (
               <BillingIcon onClick={() => handleBilling(row.id)} />
             ) : null}
-            {row.isRecurring && row.status.toLowerCase() !== "completed" ? (
+            {canCreateServiceOrder && row.isRecurring && row.status.toLowerCase() !== "completed" ? (
               <RecurringIcon onClick={() => handleRecurring(row.id)} />
             ) : null}
           </div>
@@ -277,8 +289,10 @@ const ServiceOrderIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add ServiceOrder" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateServiceOrder && (
+          <AddButton title="Add ServiceOrder" onClick={handleOpenModal} />
+        )}
       </div>
       {errorMessage && (
         <div className="alert alert-error">

@@ -7,6 +7,7 @@ import {
   EditIcon,
   ShowIcon,
 } from "@/components/ui/buttons/IconBtn";
+import usePermission from "@/hooks/usePermission";
 import Modal from "@/components/ui/Model";
 import AddPart from "./Create";
 
@@ -21,69 +22,25 @@ type Part = {
   stock: string;
 };
 
-const columns = [
-  {
-    name: "SN",
-    selector: (_: Part, index: number) => index + 1,
-    sortable: false,
-    width: "70px",
-  },
-  {
-    name: "Image",
-    selector: (row: Part) => (
-      <img src={row.image} alt={row.name} width="50" height="50" />
-    ),
-    sortable: false,
-    width: "90px",
-  },
-  {
-    name: "Part Name",
-    selector: (row: Part) => row.name,
-    sortable: true,
-    wrap: true,
-    // innerWidth: "700px",
-    width: "25%",
-  },
-  {
-    name: "Selling Price",
-    selector: (row: Part) => row.sellingPrice,
-    sortable: true,
-  },
-  {
-    name: "Cost Price",
-    selector: (row: Part) => row.costPrice,
-    sortable: true,
-  },
-  { name: "Stock", selector: (row: Part) => row.stock, sortable: true },
-  {
-    name: "Action",
-    cell: (row: Part) => (
-      <div className="inline-flex space-x-2">
-        <ShowIcon link={`/admin/part/show/${row.id}`} />
-        <EditIcon link={`/admin/part/edit/${row.id}`} />
-        {/* <DeleteIcon onClick={() => handleAction('delete', row.id)} /> */}
-      </div>
-    ),
-    sortable: false,
-    width: "10%",
-  },
-];
-
 const handleAction = (action: string, id: string) => {
   console.log(`Action: ${action} on part with SKU: ${id}`);
   // Implement your action logic here (e.g., Edit or Delete the part)
 };
 
 const PartIndex = () => {
-    const [partData, setpartData] = useState<Part[]>([]);
-    const [totalRows, setTotalRows] = useState(0);
-    const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(20);
-    const [sortField, setSortField] = useState("");
-    const [sortOrder, setSortOrder] = useState("");
-    const [search, setSearch] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [partData, setpartData] = useState<Part[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const canCreatePart = usePermission("part", "create");
+  const canEditPart = usePermission("part", "edit");
+  const canDeletePart = usePermission("part", "delete");
   
   const fetchpartData = async () => {
       try {
@@ -123,10 +80,64 @@ const PartIndex = () => {
     setIsModalOpen(false);
   };
 
+  const columns = [
+  {
+    name: "SN",
+    selector: (_: Part, index: number) => index + 1,
+    sortable: false,
+    width: "70px",
+  },
+  {
+    name: "Image",
+    selector: (row: Part) => (
+      <img src={row.image} alt={row.name} width="50" height="50" />
+    ),
+    sortable: false,
+    width: "90px",
+  },
+  {
+    name: "Part Name",
+    selector: (row: Part) => row.name,
+    sortable: true,
+    wrap: true,
+    // innerWidth: "700px",
+    width: "25%",
+  },
+  {
+    name: "Selling Price",
+    selector: (row: Part) => row.sellingPrice,
+    sortable: true,
+  },
+  {
+    name: "Cost Price",
+    selector: (row: Part) => row.costPrice,
+    sortable: true,
+  },
+  { name: "Stock", selector: (row: Part) => row.stock, sortable: true },
+  {
+    name: "Action",
+    cell: (row: Part) => (
+      <div className="inline-flex space-x-2">
+        <ShowIcon link={`/admin/part/show/${row.id}`} />
+        {canEditPart && (
+          <EditIcon link={`/admin/part/edit/${row.id}`} />
+        )}
+        {/* {canDeletePart && (
+          <DeleteIcon onClick={() => handleAction('delete', row.id)} />
+        )} */}
+      </div>
+    ),
+    sortable: false,
+    width: "10%",
+  },
+];
+
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Product" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreatePart && (
+          <AddButton title="Add Product" onClick={handleOpenModal} />
+        )}
       </div>
       {errorMessage && (
         <div className="alert alert-error">

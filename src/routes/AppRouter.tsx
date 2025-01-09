@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  Outlet,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -55,7 +56,7 @@ import POSReport from "@/pages/admin/reports/POSReport";
 import SystemConfigurationPage from "@/pages/admin/configs/System";
 import BusinessConfigurationPage from "@/pages/admin/configs/Business";
 
-const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+const PrivateRoute: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
@@ -76,7 +77,7 @@ const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <Outlet />;
 };
 
 const AppRouter: React.FC = () => {
@@ -100,37 +101,33 @@ const AppRouter: React.FC = () => {
         </Route> */}
 
         {/* admin route  start*/}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <AdminLayout module="" action="">
+        <Route element={<PrivateRoute />}>
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <AdminLayout module="dashboard" action="view">
                 <Dashboard />
               </AdminLayout>
-            </PrivateRoute>
-          }
-        />
+            }
+          />
 
         {/* customer */}
         <Route
           path="/admin/customers"
           element={
-            <PrivateRoute>
-              <AdminLayout module="customer" action="view">
-                <CustomerIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="customer" action="view">
+              <CustomerIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/customer/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="customer" action="edit">
-                <EditCustomer />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="customer" action="edit">
+              <EditCustomer />
+            </AdminLayout>
           }
         />
 
@@ -138,22 +135,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/roles"
           element={
-            <PrivateRoute>
-              <AdminLayout module="role" action="view">
-                <RoleIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="role" action="view">
+              <RoleIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/role/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="role" action="edit">
-                <EditRole />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="role" action="edit">
+              <EditRole />
+            </AdminLayout>
           }
         />
 
@@ -161,22 +154,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/employees"
           element={
-            <PrivateRoute>
-              <AdminLayout module="employee" action="view">
-                <EmployeeIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="employee" action="view">
+              <EmployeeIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/employee/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="employee" action="edit">
-                <EditEmployee />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="employee" action="edit">
+              <EditEmployee />
+            </AdminLayout>
           }
         />
 
@@ -184,22 +173,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/category"
           element={
-            <PrivateRoute>
-              <AdminLayout module="category" action="view">
-                <ProductCategoryIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="category" action="view">
+              <ProductCategoryIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/category/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="category" action="edit">
-                <EditCategory />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="category" action="edit">
+              <EditCategory />
+            </AdminLayout>
           }
         />
 
@@ -207,22 +192,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/products"
           element={
-            <PrivateRoute>
-              <AdminLayout module="product" action="view">
-                <ProductIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="product" action="view">
+              <ProductIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/products/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="product" action="edit">
-                <EditProduct />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="product" action="edit">
+              <EditProduct />
+            </AdminLayout>
           }
         />
 
@@ -230,22 +211,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/parts"
           element={
-            <PrivateRoute>
-              <AdminLayout module="part" action="view">
-                <PartIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="part" action="view">
+              <PartIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/part/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="part" action="edit">
-                <EditPart />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="part" action="edit">
+              <EditPart />
+            </AdminLayout>
           }
         />
 
@@ -253,11 +230,9 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/pos"
           element={
-            <PrivateRoute>
-              <AdminLayout module="pos" action="view">
-                <POSIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="pos" action="view">
+              <POSIndex />
+            </AdminLayout>
           }
         />
         
@@ -265,22 +240,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/service"
           element={
-            <PrivateRoute>
-              <AdminLayout module="service" action="view">
-                <ServiceIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="service" action="view">
+              <ServiceIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/service/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="service" action="edit">
-                <EditService />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="service" action="edit">
+              <EditService />
+            </AdminLayout>
           }
         />
 
@@ -288,22 +259,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/service_order"
           element={
-            <PrivateRoute>
-              <AdminLayout module="service_order" action="view">
-                <ServiceOrderIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="service_order" action="view">
+              <ServiceOrderIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/service_order/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="service_order" action="edit">
-                <EditServiceOrder />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="service_order" action="edit">
+              <EditServiceOrder />
+            </AdminLayout>
           }
         />
 
@@ -311,33 +278,27 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/billings"
           element={
-            <PrivateRoute>
-              <AdminLayout module="billing" action="view">
-                <BillingIndex />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="billing" action="view">
+              <BillingIndex />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/billings/create"
           element={
-            <PrivateRoute>
-              <AdminLayout module="billing" action="create">
-                <AddBilling />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="billing" action="create">
+              <AddBilling />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/billing/edit/:id"
           element={
-            <PrivateRoute>
-              <AdminLayout module="billing" action="edit">
-                <EditBilling />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="billing" action="edit">
+              <EditBilling />
+            </AdminLayout>
           }
         />
 
@@ -345,33 +306,27 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/report/service-order"
           element={
-            <PrivateRoute>
-              <AdminLayout module="reports" action="service_order_report">
-                <ServiceOrderReport />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="reports" action="service_order_report">
+              <ServiceOrderReport />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/report/billing"
           element={
-            <PrivateRoute>
-              <AdminLayout module="reports" action="service_billing_report">
-                <BillingReport />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="reports" action="service_billing_report">
+              <BillingReport />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/report/pos"
           element={
-            <PrivateRoute>
-              <AdminLayout module="reports" action="POS_report">
-                <POSReport />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="reports" action="POS_report">
+              <POSReport />
+            </AdminLayout>
           }
         />
 
@@ -379,22 +334,18 @@ const AppRouter: React.FC = () => {
         <Route
           path="/admin/system_config"
           element={
-            <PrivateRoute>
-              <AdminLayout module="system_config" action="view">
-                <SystemConfigurationPage />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="system_config" action="view">
+              <SystemConfigurationPage />
+            </AdminLayout>
           }
         />
 
         <Route
           path="/admin/business_config"
           element={
-            <PrivateRoute>
-              <AdminLayout module="business_config" action="view">
-                <BusinessConfigurationPage />
-              </AdminLayout>
-            </PrivateRoute>
+            <AdminLayout module="business_config" action="view">
+              <BusinessConfigurationPage />
+            </AdminLayout>
           }
         />
 
@@ -402,7 +353,7 @@ const AppRouter: React.FC = () => {
         />
 
         {/* admin route  end*/}
-
+          </Route>
         {/* <Route path="*" element={<Navigate to="/landing" />} /> */}
       </Routes>
     </Router>

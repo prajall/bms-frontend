@@ -11,6 +11,7 @@ import {
 import AddService from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
+import usePermission from "@/hooks/usePermission";
 
 type Service = {
   id: string;
@@ -34,6 +35,10 @@ const ServiceIndex = () => {
   const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const canCreateService = usePermission("service", "create");
+  const canEditService = usePermission("service", "edit");
+  const canDeleteService = usePermission("service", "delete");
 
   const fetchServiceData = async () => {
     try {
@@ -158,8 +163,12 @@ const ServiceIndex = () => {
       cell: (row: Service) => (
         <div className="inline-flex space-x-2">
           <ShowIcon link={`/admin/service/show/${row.id}`} />
-          <EditIcon link={`/admin/service/edit/${row.id}`} />
-          <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          {canEditService && (
+            <EditIcon link={`/admin/service/edit/${row.id}`} />
+          )}
+          {canDeleteService && (
+            <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          )}
         </div>
       ),
       sortable: false,
@@ -180,8 +189,10 @@ const ServiceIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Service" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateService && (
+          <AddButton title="Add Service" onClick={handleOpenModal} />
+        )}
       </div>
       {errorMessage && (
         <div className="alert alert-error">

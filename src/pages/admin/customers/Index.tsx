@@ -8,6 +8,7 @@ import {
   EditIcon,
   ShowIcon,
 } from "@/components/ui/buttons/IconBtn";
+import usePermission from "@/hooks/usePermission";
 import AddCustomer from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
@@ -32,6 +33,10 @@ const CustomerIndex = () => {
   const [sortOrder, setSortOrder] = useState("");
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const canCreateCustomer = usePermission("customer", "create");
+  const canEditCustomer = usePermission("customer", "edit");
+  const canDeleteCustomer = usePermission("customer", "delete");
 
   const fetchCustomerData = async () => {
     try {
@@ -156,8 +161,12 @@ const CustomerIndex = () => {
       cell: (row: Customer) => (
         <div className="inline-flex space-x-2">
           <ShowIcon link={`/admin/customer/show/${row.id}`} />
-          <EditIcon link={`/admin/customer/edit/${row.id}`} />
-          <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          {canEditCustomer && (
+            <EditIcon link={`/admin/customer/edit/${row.id}`} />
+          )}
+          {canDeleteCustomer && (
+            <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+          )}
         </div>
       ),
       sortable: false,
@@ -174,8 +183,10 @@ const CustomerIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Customer" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateCustomer && (
+          <AddButton title="Add Customer" onClick={handleOpenModal} />
+        )}
       </div>
       {errorMessage && (
         <div className="alert alert-error">

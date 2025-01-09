@@ -7,6 +7,7 @@ import { DeleteIcon, EditIcon, ShowIcon } from "@/components/ui/buttons/IconBtn"
 import AddRole from "./Create";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
+import usePermission from "@/hooks/usePermission";
 
 type Permission = {
     module: string;
@@ -23,6 +24,10 @@ const RoleIndex = () => {
   const [roleData, setRoleData] = useState<Role[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const canCreateRole = usePermission("role", "create");
+  const canEditRole = usePermission("role", "edit");
+  const canDeleteRole = usePermission("role", "delete");
 
     const fetchRoleData = async () => {
       try {
@@ -96,12 +101,23 @@ const RoleIndex = () => {
         { name: 'Role Name', selector: (row: Role) => row.name, sortable: true },
         {
             name: 'Permissions',
-            cell: (row: Role) =>
-                row.permissions.map((permission) => (
-                <div key={permission.module}>
-                    <strong>{permission.module}:</strong> {permission.actions.join(', ')}
+            cell: (row: Role) => (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              {row.permissions.map((permission, index) => (
+                <div
+                  key={`${permission.module}-${index}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '5px', // Adds spacing between rows
+                  }}
+                >
+                  <strong style={{ marginRight: '5px' }}>{permission.module}:</strong>
+                  <span>{permission.actions.join(', ')}</span>
                 </div>
-                )),
+              ))}
+            </div>
+          ),
             sortable: false,
             wrap: true,
         },
@@ -110,8 +126,12 @@ const RoleIndex = () => {
             cell: (row: Role) => (
             <div className="inline-flex space-x-2">
                 <ShowIcon link={`/admin/role/show/${row.id}`} />
-                <EditIcon link={`/admin/role/edit/${row.id}`} />
-                <DeleteIcon onClick={() => handleAction('delete', row.id)} />
+                {canEditRole && (
+                  <EditIcon link={`/admin/role/edit/${row.id}`} />
+                )}
+                {canDeleteRole && (
+                  <DeleteIcon onClick={() => handleAction('delete', row.id)} />
+                )}
             </div>
             ),
             sortable: false
@@ -133,8 +153,10 @@ const RoleIndex = () => {
     
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Role" onClick={handleOpenModal} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateRole && (
+          <AddButton title="Add Role" onClick={handleOpenModal} />
+        )}
       </div>
       {errorMessage && (
         <div className="alert alert-error">

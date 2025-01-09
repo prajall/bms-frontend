@@ -8,12 +8,12 @@ import {
   ShowIcon,
   PrintIcon
 } from "@/components/ui/buttons/IconBtn";
-// import AddBilling from "./Create";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
 import Invoice from "./Invoice";
 import { useReactToPrint, UseReactToPrintOptions } from "react-to-print";
+import usePermission from "@/hooks/usePermission";
 
 export type Billing = {
   id: string;
@@ -28,6 +28,10 @@ export type Billing = {
   paidAmount: number;
   totalPaid: number;
   serviceCharge: number;
+  serviceOrders: any[];
+  discount: number;
+  tax: number;
+  finalTotal: number;
 };
 
 const BillingIndex = () => {
@@ -42,7 +46,11 @@ const BillingIndex = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [billToPrint, setBillToPrint] = useState<Billing | null>(null);
 
-  const invoiceRef = useRef<HTMLDivElement>(null);
+  const canCreateBilling = usePermission("billing", "create");
+  const canEditBilling = usePermission("billing", "edit");
+  const canDeleteBilling = usePermission("billing", "delete");
+
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const fetchBillingData = async () => {
     try {
@@ -68,6 +76,10 @@ const BillingIndex = () => {
           `${item.customer.address.houseNo}, ${item.customer.address.addressLine}, ${item.customer.address.city}, ${item.customer.address.province}, ${item.customer.address.country}` 
           : 'Address not available',
           serviceCharge: item.serviceOrder?.serviceCharge,
+          serviceOrders: item.serviceOrders,
+          discount: item.discount,
+          tax: item.tax,
+          finalTotal: item.finalTotal,
         }));
         setBillingData(formattedData);
         setTotalRows(response.data.data.totalBillings);
@@ -164,9 +176,12 @@ const BillingIndex = () => {
         cell: (row: Billing) => (
             <div className="inline-flex space-x-2">
             <ShowIcon link={`/admin/billing/show/${row.id}`} />
-            <EditIcon link={`/admin/billing/edit/${row.id}`} />
-            <DeleteIcon onClick={() => handleAction("delete", row.id)} />
-            {/* <PrintIcon onClick={() => printPreview(row)} /> */}
+            {canEditBilling && (
+              <EditIcon link={`/admin/billing/edit/${row.id}`} />
+            )}
+            {canDeleteBilling && (
+              <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+            )}
              <PrintIcon onClick={() => printBill(row)} />
             </div>
         ),
@@ -174,30 +189,26 @@ const BillingIndex = () => {
         },
   ];
 
-  // useEffect(() => {
-  //   if (billToPrint) {
-  //     handlePrint();
-  //   }
-  // }, [billToPrint]);
-
-
   const handlePrint = useReactToPrint({
-    invoiceRef,
+    contentRef,
     documentTitle: "Service Invoice",
     onAfterPrint: async () => {
       console.log("Print completed");
     },
     onBeforePrint: async () => {
-      console.log("Preparing to print...");
+      console.log("Preparing to print...", contentRef);
     }
   } as UseReactToPrintOptions);
 
   const printBill = (bill: Billing) => {
     setBillToPrint(bill);
-    handlePrint()
-    // setTimeout(() => {
-    //   handlePrint();
-    // }, 0);
+    setTimeout(() => {
+    if (contentRef.current) {
+      handlePrint(); 
+    } else {
+      console.error("Content reference is not ready for printing.");
+    }
+  }, 100);
   };
   const createBilling = () => {
     navigate("/admin/billings/create");
@@ -209,8 +220,10 @@ const BillingIndex = () => {
 
   return (
     <div className="relative">
-      <div className="flex justify-end mt-1">
-        <AddButton title="Add Service Billing" onClick={createBilling} />
+      <div className="flex justify-end mt-1 h-8">
+        {canCreateBilling && (
+          <AddButton title="Add Service Billing" onClick={createBilling} />
+        )}
       </div>
       {errorMessage && (
         <div className="alert alert-error">
@@ -239,7 +252,7 @@ const BillingIndex = () => {
 
       {billToPrint && (
         <div style={{ position: "absolute", top: "-9999px", left: "-9999px" }}>
-          <Invoice ref={invoiceRef} bill={billToPrint} />
+          <Invoice ref={contentRef} bill={billToPrint} />
         </div>
       )}
     </div>
