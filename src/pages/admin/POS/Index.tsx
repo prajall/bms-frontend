@@ -313,7 +313,6 @@ export default function POSPage() {
               onRemoveItem={handleRemoveItem}
               onEmptyCart={handleEmptyCart}
               onPay={() => {
-                console.log(cartItems);
                 setShowBill(true);
               }}
             />

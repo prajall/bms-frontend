@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import SelectCustomer from "@/components/formElements/SelectCustomer";
+import { ProductSelect } from "@/components/formElements/ProductSelect";
+import { PartSelect } from "@/components/formElements/PartSelect";
 import { useReactToPrint } from "react-to-print";
 import * as XLSX from "xlsx";
 import ReportHeader from "./ReportHeader";
@@ -88,17 +90,15 @@ const POSReport: React.FC = () => {
 
       {/* Filters */}
       <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <Input
-          type="text"
-          placeholder="Filter by Product ID"
-          value={filters.product}
-          onChange={(e) => setFilters({ ...filters, product: e.target.value })}
+        <ProductSelect
+          selectedProduct={filters.product}
+          onChange={(product) => setFilters({ ...filters, product })}
+          showAddProductButton={false}
         />
-        <Input
-          type="text"
-          placeholder="Filter by Part ID"
-          value={filters.part}
-          onChange={(e) => setFilters({ ...filters, part: e.target.value })}
+        <PartSelect
+          selectedPart={filters.part}
+          onChange={(part) => setFilters({ ...filters, part })}
+          showAddPartButton={false}
         />
         <SelectCustomer
           selectedCustomer={filters.customer}
@@ -117,21 +117,20 @@ const POSReport: React.FC = () => {
           value={filters.to}
           onChange={(e) => setFilters({ ...filters, to: e.target.value })}
         />
-      </div>
-
-      <div className="flex justify-end mb-4 space-x-4">
-        <button
-          onClick={exportToExcel}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Export to Excel
-        </button>
-        <button
-          onClick={() => handlePrint && handlePrint()}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          Print
-        </button>
+        <div className="flex justify-end mb-4 space-x-4">
+          <button
+            onClick={exportToExcel}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Export to Excel
+          </button>
+          <button
+            onClick={() => handlePrint && handlePrint()}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            Print
+          </button>
+        </div>
       </div>
 
       <div ref={contentRef}>

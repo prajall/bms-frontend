@@ -30,7 +30,10 @@ export type Billing = {
   serviceCharge: number;
   serviceOrders: any[];
   discount: number;
+  discountAmount: number;
+  taxableAmount: number;
   tax: number;
+  taxAmount: number;
   finalTotal: number;
 };
 
@@ -78,7 +81,10 @@ const BillingIndex = () => {
           serviceCharge: item.serviceOrder?.serviceCharge,
           serviceOrders: item.serviceOrders,
           discount: item.discount,
+          discountAmount: item.discountAmount,
+          taxableAmount: item.taxableAmount,
           tax: item.tax,
+          taxAmount: item.taxAmount,
           finalTotal: item.finalTotal,
         }));
         setBillingData(formattedData);

@@ -32,6 +32,12 @@ interface Billing {
     totalAmount: number;
     totalPaid: number;
     status: string;
+    discount: number;
+    discountAmount: number;
+    taxableAmount: number;
+    tax: number;
+    taxAmount: number;
+    finalTotal: number;
 }
 
 interface ReportData {
@@ -260,16 +266,21 @@ const BillingReport: React.FC = () => {
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Invoice</th>
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Date</th>
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Customer</th>
-                <th colSpan={3} className="border border-gray-300 px-4 py-2 text-start">Service Orders</th>
+                <th colSpan={4} className="border border-gray-300 px-4 py-2 text-start">Service Orders</th>
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Status</th>
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Total Amount</th>
+                <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Discount Amt.</th>
+                <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Taxable Amount</th>
+                <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Tax Amount</th>
+                <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Final Total</th>
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Paid Amount</th>
                 <th rowSpan={2} className="border border-gray-300 px-4 py-2 text-start">Remaining Amount</th>
             </tr>
             <tr>
                 <th className="border border-gray-300 px-4 py-2">Order</th>
                 <th className="border border-gray-300 px-4 py-2">Date</th>   
-                <th className="border border-gray-300 px-4 py-2">Service</th>                 
+                <th className="border border-gray-300 px-4 py-2">Service</th> 
+                <th className="border border-gray-300 px-4 py-2">Charge</th> 
             </tr>
           </thead>
           <tbody>
@@ -311,6 +322,9 @@ const BillingReport: React.FC = () => {
                 <td className="border border-gray-300 px-4 py-2">
                     {billing.serviceOrders[0].serviceOrder?.service?.title || "N/A"}
                 </td>
+                <td className="border border-gray-300 px-4 py-2">
+                    {billing.serviceOrders[0].serviceOrder?.serviceCharge || "N/A"}
+                </td>
                 </>
             ) : (
                 <td
@@ -330,19 +344,43 @@ const BillingReport: React.FC = () => {
                 className="border border-gray-300 px-4 py-2"
                 rowSpan={billing.serviceOrders.length || 1}
             >
-                Rs.{billing.totalAmount}
+                Rs.{billing.totalAmount.toFixed(2)}
             </td>
             <td
                 className="border border-gray-300 px-4 py-2"
                 rowSpan={billing.serviceOrders.length || 1}
             >
-                Rs.{billing.totalPaid}
+                Rs.{billing.discountAmount.toFixed(2)}
             </td>
             <td
                 className="border border-gray-300 px-4 py-2"
                 rowSpan={billing.serviceOrders.length || 1}
             >
-                Rs.{billing.totalAmount - billing.totalPaid}
+                Rs.{billing.taxableAmount.toFixed(2)}
+            </td>
+            <td
+                className="border border-gray-300 px-4 py-2"
+                rowSpan={billing.serviceOrders.length || 1}
+            >
+                Rs.{billing.taxAmount.toFixed(2)}
+            </td>
+            <td
+                className="border border-gray-300 px-4 py-2"
+                rowSpan={billing.serviceOrders.length || 1}
+            >
+                Rs.{billing.finalTotal.toFixed(2)}
+            </td>
+            <td
+                className="border border-gray-300 px-4 py-2"
+                rowSpan={billing.serviceOrders.length || 1}
+            >
+                Rs.{billing.totalPaid.toFixed(2)}
+            </td>
+            <td
+                className="border border-gray-300 px-4 py-2"
+                rowSpan={billing.serviceOrders.length || 1}
+            >
+                Rs.{(billing.finalTotal - billing.totalPaid).toFixed(2)}
             </td>
             </tr>
             {billing.serviceOrders.slice(1).map((order: any, orderIndex: number) => (
@@ -354,21 +392,36 @@ const BillingReport: React.FC = () => {
                 <td className="border border-gray-300 px-4 py-2">
                 {order.serviceOrder?.service?.title || "N/A"}
                 </td>
+                <td className="border border-gray-300 px-4 py-2">
+                {order.serviceOrder?.serviceCharge || "N/A"}
+                </td>
             </tr>
              ))}
             </React.Fragment>
             ))}
             <tr className="bg-gray-100 font-bold">
             <td colSpan={6} className="border border-gray-300 px-4 py-2 text-right">Totals:</td>
-            <td colSpan={2} className="border border-gray-300 px-4 py-2 text-right">Billings: { data.totalBillings }</td>
+            <td colSpan={3} className="border border-gray-300 px-4 py-2 text-right">Billings: { data.totalBillings }</td>
               <td className="border border-gray-300 px-4 py-2">
-                Rs.{data.totalAmount || data.billings?.reduce((acc, bill) => acc + bill.totalAmount, 0)}
+                Rs.{data.totalAmount.toFixed(2) || data.billings?.reduce((acc, bill) => acc + bill.totalAmount, 0).toFixed(2)}
               </td>
               <td className="border border-gray-300 px-4 py-2">
-                Rs.{data.totalPaid || data.billings?.reduce((acc, bill) => acc + bill.totalPaid || 0, 0)}
+                Rs.{data.billings?.reduce((acc, bill) => acc + bill.discountAmount, 0).toFixed(2)}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                Rs.{data.billings?.reduce((acc, bill) => acc + bill.taxableAmount, 0).toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
-                Rs.{data.remainingAmount || data.billings?.reduce((acc, bill) => acc + bill.totalAmount - bill.totalPaid, 0)}
+                Rs.{data.billings?.reduce((acc, bill) => acc + bill.taxAmount, 0).toFixed(2)}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                Rs.{data.billings?.reduce((acc, bill) => acc + bill.finalTotal, 0).toFixed(2)}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                Rs.{data.totalPaid.toFixed(2) || data.billings?.reduce((acc, bill) => acc + bill.totalPaid || 0, 0).toFixed(2)}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                Rs.{data.billings?.reduce((acc, bill) => acc + bill.finalTotal - bill.totalPaid, 0).toFixed(2)}
               </td>
               {/* <td className="border border-gray-300 px-4 py-2">
                 Rs.{data.finalTotal || 0}

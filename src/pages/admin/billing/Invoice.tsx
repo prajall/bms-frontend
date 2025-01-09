@@ -86,19 +86,19 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ bill }, ref) => {
                 <span className="font-semibold text-sm">
                   Discount ({bill?.discount || 0}%):
                 </span>
-                <span>- { symbol } {discountAmount.toFixed(2)}</span>
+                <span>- { symbol } {(bill.discountAmount || discountAmount).toFixed(2)}</span>
               </div>
               <div className="flex justify-between mt-2">
                 <span className="font-semibold text-sm">Total After Discount:</span>
-                <span>{ symbol } {totalAfterDiscount.toFixed(2)}</span>
+                <span>{ symbol } {(bill.taxableAmount || totalAfterDiscount).toFixed(2)}</span>
               </div>
               <div className="flex justify-between mt-2">
                 <span className="font-semibold text-sm">Tax ({bill?.tax || 0}%):</span>
-                <span>{ symbol } {taxAmount.toFixed(2)}</span>
+                <span>{ symbol } {(bill.taxAmount || taxAmount).toFixed(2)}</span>
               </div>
               <div className="flex justify-between mt-2 border-t border-black pt-2">
                 <span className="font-bold text-lg">Final Total:</span>
-                <span className="font-bold text-lg">{ symbol } {bill.finalTotal.toFixed(2)}</span>
+                <span className="font-bold text-lg">{ symbol } {(bill.finalTotal || totalAmtAfterTax).toFixed(2)}</span>
               </div>
               <div className="flex justify-between mt-2">
                 <span className="font-semibold text-sm">Amount Paid:</span>
