@@ -36,6 +36,7 @@ import PartIndex from "@/pages/admin/parts/Index";
 import EditPart from "@/pages/admin/parts/Edit";
 
 import POSIndex from "@/pages/admin/POS/Index";
+import POSPage from "@/pages/admin/POS/Create";
 
 import ServiceIndex from "@/pages/admin/services/service/Index";
 import EditService from "@/pages/admin/services/service/Edit";
@@ -232,6 +233,15 @@ const AppRouter: React.FC = () => {
           element={
             <AdminLayout module="pos" action="view">
               <POSIndex />
+            </AdminLayout>
+          }
+        />
+        
+        <Route
+          path="/admin/pos/create"
+          element={
+            <AdminLayout module="pos" action="create">
+              <POSPage />
             </AdminLayout>
           }
         />

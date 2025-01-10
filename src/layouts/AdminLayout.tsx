@@ -21,7 +21,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({children,module= "dashboard", 
   }
 
   // Determine if the current route is /admin/pos
-  const isPosRoute = location.pathname === "/admin/pos";
+  const isPosRoute = location.pathname === "/admin/pos/create";
 
   return (
     <div className="dark:bg-boxdark-2 bg-background_light dark:text-bodydark">

@@ -228,7 +228,7 @@ const BillingIndex = () => {
     <div className="relative">
       <div className="flex justify-end mt-1 h-8">
         {canCreateBilling && (
-          <AddButton title="Add Service Billing" onClick={createBilling} />
+          <AddButton title="Create Billing" onClick={createBilling} />
         )}
       </div>
       {errorMessage && (

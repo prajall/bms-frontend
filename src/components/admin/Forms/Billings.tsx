@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { ServiceOrderSelect } from '@/components/formElements/SelectServiceOrder';
+import { POSOrderSelect } from '@/components/formElements/SelectPOSOrder';
 import SelectCustomer from '@/components/formElements/SelectCustomer';
 import { useServiceOrderByOrderId } from '@/hooks/useService';
 import { toast } from "react-toastify";
@@ -24,6 +25,7 @@ interface ServiceReference {
 interface BillingsFormData {
   date: string;
   orderId: string;
+  posOrder: string;
   serviceOrders: ServiceReference[];
   customer?: ServiceReference | string;
   totalAmount?: number;
@@ -56,6 +58,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     defaultValues: {
       date: formatDateToYYYYMMDD(new Date()),
       orderId: '',
+      posOrder: '',
       serviceOrders: [],
       customer: '',
       totalAmount: 0,
@@ -71,6 +74,9 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
 
   const [selectedServiceOrder, setSelectedServiceOrder] = useState<string>(
     typeof initialData?.orderId === 'object' ? '' : String(initialData?.orderId)
+  );
+  const [selectedPOSOrder, setSelectedPOSOrder] = useState<string>(
+    typeof initialData?.posOrder === 'object' ? '' : String(initialData?.posOrder)
   );
   const [serviceOrders, setServiceOrders] = useState<ServiceReference[]>(initialData?.serviceOrders || []);
   const [selectedCustomer, setSelectedCustomer] = useState<string>(
@@ -125,19 +131,19 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
         .filter((newOrder: any) => {
           if (newOrder.paymentStatus === "paid" && !initialData) {
             setPaymentMessage("Payment has already been made.");
-            return false; 
+            return false;
           }
-          return true; 
+          return true;
         })
         .map((newOrder: any) => {
-        const totalPaid = previousBillings
-          .filter((billing) => billing.serviceOrder === newOrder._id)
-          .reduce((sum, billing) => sum + (billing.paidAmount || 0), 0);
-        return {
-          ...newOrder,
-          orderId: serviceOrder.orderId,
-          remainingBalance: (newOrder.serviceCharge || 0) - totalPaid,
-        };
+          const totalPaid = previousBillings
+            .filter((billing) => billing.serviceOrder === newOrder._id)
+            .reduce((sum, billing) => sum + (billing.paidAmount || 0), 0);
+          return {
+            ...newOrder,
+            orderId: serviceOrder.orderId,
+            remainingBalance: (newOrder.serviceCharge || 0) - totalPaid,
+          };
         }) || [];
       
       setServiceOrders((prev) => {
@@ -147,20 +153,9 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
             (newOrder: ServiceReference) => !prev.some((existingOrder) => existingOrder._id === newOrder._id)
           ),
         ];
-        setValue('serviceOrders', uniqueOrders); 
+        setValue('serviceOrders', uniqueOrders);
         return uniqueOrders;
       });
-
-
-    //   setServiceOrders((prev) => {
-    //   const uniqueOrders = [
-    //     ...prev,
-    //     ...newServiceOrders.filter(
-    //       (newOrder:any) => !prev.some((existingOrder) => existingOrder._id === newOrder._id)
-    //     ),
-    //   ];
-    //   return uniqueOrders;
-    // });
 
       if (!selectedCustomer) {
         setSelectedCustomer(fetchedCustomer);
@@ -175,7 +170,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
       setValue('previousPaidAmount', totalPreviousPaid);
 
       const totalAmount = [...serviceOrders, ...newServiceOrders].reduce(
-      (sum, order) => sum + (order.serviceCharge || 0),
+        (sum, order) => sum + (order.serviceCharge || 0),
         0
       );
 
@@ -194,7 +189,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     const taxPercentage = Number(watch('tax')) || 0;
 
     const discountAmount = (totalAmount * discountPercentage) / 100;
-    const taxableAmount = totalAmount - discountAmount; 
+    const taxableAmount = totalAmount - discountAmount;
     const taxAmount = (taxableAmount * taxPercentage) / 100;
 
     const remainingAmount = taxableAmount + taxAmount - (previousPaid + totalPaid);
@@ -227,6 +222,10 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     setSelectedServiceOrder(value);
     setValue('orderId', value);
     setPaymentMessage(null);
+  };
+
+  const handlePOSOrderChange = () => {
+
   };
 
   const handleCustomerChange = (value: string) => {
@@ -288,9 +287,9 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
               />
             </div>
 
-            {/* Order ID */}
+            {/* Service Order ID */}
             <div className="mb-4">
-              <Label htmlFor="orderId">Order ID</Label>
+              <Label htmlFor="orderId">Service Order ID</Label>
               <ServiceOrderSelect
                 selectedServiceOrder={selectedServiceOrder}
                 onChange={handleServiceOrderChange}
@@ -298,6 +297,19 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
                 type={"OrderId"}
               />
               {errors.orderId && <p className="text-red-500 text-xs mt-1">{errors.orderId.message}</p>}
+              {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
+            </div>
+
+            {/* Order ID */}
+            <div className="mb-4">
+              <Label htmlFor="posOrder">POS Order ID</Label>
+              <POSOrderSelect
+                selectedPOSOrder={selectedPOSOrder}
+                onChange={handlePOSOrderChange}
+                showAddPOSOrderButton={false}
+                // type={"OrderId"}
+              />
+              {errors.posOrder && <p className="text-red-500 text-xs mt-1">{errors.posOrder.message}</p>}
               {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
             </div>
           </div>

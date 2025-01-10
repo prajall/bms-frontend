@@ -4,12 +4,15 @@ import { Customer } from "../customers/Index";
 import Modal from "@/components/ui/Model";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
+import { useBusinessConfig } from "@/hooks/useBusinessConfig";
+import { useUser } from "@/hooks/useUser";
+
 
 const Bill = ({
   discount,
   discountAmount,
   TAX_RATE,
-  customerId,
+  customer,
   items,
   tax,
   total,
@@ -21,18 +24,11 @@ const Bill = ({
   TAX_RATE: number;
   tax: number;
   total: number;
-  customerId: string;
+  customer: any;
   subTotal: number;
 }) => {
-  const [customer, setCustomer] = useState<Customer>({
-    name: "Walking Customer",
-    id: "string",
-    user: "string",
-    image: "string",
-    gender: "string",
-    address: "string",
-    phoneNo: "string",
-  });
+  const { businessConfig, loading } = useBusinessConfig();
+  const { isAuthenticated, user } = useUser();
 
   const currentDate = new Date().toLocaleDateString();
 
@@ -47,19 +43,19 @@ const Bill = ({
       {/* Customer Info */}
 
       <div className="flex flex-wrap justify-between">
-        <div className="p-2 flex-1">
+        <div className="p-2 flex-1 w-1/4">
           <p className="font-semibold">Issued</p>
           <p>{currentDate}</p>
         </div>
         <div className="pl-4 p-2 flex-1 border-x">
           <p className="font-semibold">Billed to</p>
-          <p>{customer.name}</p>
+          <p>{customer.label}</p>
         </div>
         <div className="pl-4 p-2 flex-1">
           <p className="font-semibold">From</p>
-          <p>Company Name</p>
-          <p>Employee name</p>
-          <p>Company address</p>
+          <p>{ businessConfig?.businessName}</p>
+          <p>{isAuthenticated ? user?.name : "Not authenticated"}</p>
+          <p>{ businessConfig?.address}</p>
         </div>
       </div>
 

@@ -1,386 +1,266 @@
-"use client";
-
-import CustomerSelect from "@/components/formElements/CustomerSelect";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import TableLayout from "@/components/admin/TableLayout";
+import AddButton from "@/components/ui/buttons/AddButton";
+import {
+  DeleteIcon,
+  EditIcon,
+  ShowIcon,
+  PrintIcon
+} from "@/components/ui/buttons/IconBtn";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Customer } from "../customers/Index";
-import Cart, { CartItem, Item } from "./Cart";
-import { ItemGrid } from "./ItemsGrid";
-import Bill from "./Bill";
-import { Button } from "@/components/ui/button";
-import Modal from "@/components/ui/Model";
-import InstallationForm from "./InstallationForm";
+import { SuccessToast, ErrorToast } from "@/components/ui/customToast";
+// import Invoice from "./Invoice";
+import { useReactToPrint, UseReactToPrintOptions } from "react-to-print";
+import usePermission from "@/hooks/usePermission";
 
-export default function POSPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [productSearchQuery, setProductSearchQuery] = useState("");
-  const [partSearchQuery, setPartSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("products"); // Tabs: products or parts
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [products, setProducts] = useState<Item[]>([]);
-  const [parts, setParts] = useState<Item[]>([]);
-  const [discount, setDiscount] = useState<number>(0);
-  const [selectedCustomer, setSelectedCustomer] = useState(
-    "67554286140992b96228ae97"
-  );
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [showBill, setShowBill] = useState(false);
+type POSType = {
+    id: string;
+    orderId: string;
+    customer: string;
+    customerType: string;
+    date: Date;
+    products: any[];
+    parts: any[];
+    subTotal: number;
+    discount: number;
+    tax: number;
+    totalPrice: number;
+    //   serviceOrders: any[];
+};
 
-  const fetchProducts = async () => {
+const POSIndex = () => {
+  const navigate = useNavigate();
+  const [posData, setPosData] = useState<POSType[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [search, setSearch] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [billToPrint, setBillToPrint] = useState<POSType | null>(null);
+
+  const canCreatePos = usePermission("pos", "create");
+  const canEditPos = usePermission("pos", "edit");
+  const canDeletePos = usePermission("pos", "delete");
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const fetchPOSData = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/product/mini-list`
-      );
-      if (response.data && response.data.success) {
-        setProducts(response.data.data.products);
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error("Failed to fetch products");
-    }
-  };
-
-  const fetchParts = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/part/mini-list`
-      );
-      if (response.data && response.data.success) {
-        console.log(response.data.data.parts);
-        setParts(response.data.data.parts);
-      }
-    } catch (error) {
-      console.error("Error fetching parts:", error);
-      toast.error("Failed to fetch parts");
-    }
-  };
-
-  const fetchCustomers = async (query: string = "") => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/customer`,
-        {
-          params: {
-            search: query,
-          },
-        }
+        `${import.meta.env.VITE_API_URL}/pos`,
+          { params: { page, limit, sortField, sortOrder, search }, withCredentials: true }
       );
       if (response.status === 200 && response.data.success) {
-        const formattedData = response.data.data.customers
-          .filter(
-            (customer: any) => customer._id !== "67554286140992b96228ae97"
-          )
-          .map((customer: any) => ({
-            id: customer._id,
-            name: customer.name,
-            gender: customer.gender,
-            image: customer.image || "",
-            address: `${customer.address.houseNo}, ${customer.address.addressLine}, ${customer.address.city}, ${customer.address.province}, ${customer.address.country}`,
-            phoneNo: customer.mobileNo1,
-          }));
-        setCustomers(formattedData);
+        const formattedData = response.data.data.posRecords.map((item: any) => ({
+            id: item._id,
+            orderId: item.orderId,
+            products: item.products?.map((product: any) => product.product?.name).join(', ') || '',
+            parts: item.parts?.map((part: any) => part.part?.name).join(', ') || '',
+            customer: item.customer?.name || "",
+            customerType: item.customerType,
+            subTotal: item.subTotal,
+            date: item.createdAt
+            ? new Date(item.createdAt).toISOString().split("T")[0]
+                : "",
+            discount: item.discount,
+            tax: item.tax,
+            totalPrice: item.totalPrice,
+            }));
+            setPosData(formattedData);
+            setTotalRows(response.data.data.pagination.totalPOS);
+            setErrorMessage("");
+      } else {
+        setErrorMessage(response.data.message || "Failed to fetch service order.");
       }
     } catch (error) {
-      console.error("Error fetching customer data:", error);
-      toast.error("Failed to fetch customers");
+      console.error("Error fetching service order data:", error);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-    fetchParts();
-    fetchCustomers();
-  }, []);
-
-  const handleProductClick = (product: Item) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) => item._id === product._id && item.type === "product"
+  const handleAction = async (action: string, id: string) => {
+    if (action === "delete") {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this service order?"
       );
+      if (!confirmDelete) return;
 
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+      try {
+        const response = await axios.delete(
+          `${import.meta.env.VITE_API_URL}/service-billing/${id}`
         );
-      }
-
-      return [...prevItems, { ...product, quantity: 1, type: "product" }];
-    });
-  };
-
-  const handlePartClick = (part: Item) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) => item._id === part._id && item.type === "part"
-      );
-
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item._id === part._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      return [...prevItems, { ...part, quantity: 1, type: "part" }];
-    });
-  };
-
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item._id === itemId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const handleRemoveItem = (itemId: string) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item._id !== itemId)
-    );
-  };
-
-  const handleEmptyCart = () => {
-    setCartItems([]);
-  };
-
-  const submitOrder = async () => {
-    if (cartItems.length === 0) {
-      toast.error("Cart is empty");
-      return;
-    }
-    console.log(cartItems);
-    // const products = cartItems.filter((item) => (item.type = "product"));
-    // const parts = cartItems.filter((item) => (item.type = "part"));
-     const products = cartItems
-      .filter((item) => item.type === "product")
-      .map((product) => ({
-        product: product._id,
-        quantity: product.quantity,
-        price: product.sellingPrice,
-      }));
-
-    const parts = cartItems
-      .filter((item) => item.type === "part")
-      .map((part) => ({
-        part: part._id,
-        quantity: part.quantity,
-        price: part.sellingPrice,
-    }));
-    const data = {
-      // products: products.map((product) => {
-      //   return {
-      //     product: product._id,
-      //     quantity: product.quantity,
-      //     price: product.sellingPrice,
-      //   };
-      // }),
-      // parts: parts.map((part) => {
-      //   return {
-      //     part: part._id,
-      //     quantity: part.quantity,
-      //     price: part.sellingPrice,
-      //   };
-      // }),
-      products,
-      parts,
-      customerType:
-        selectedCustomer === "67554286140992b96228ae97"
-          ? "walking"
-          : "registered",
-      customer: selectedCustomer,
-      subTotal,
-      discount,
-      tax: TAX_RATE * 100,
-      totalPrice: total,
-    };
-    console.log("Data: ", data);
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/pos`,
-        data
-      );
-      if (response.status === 201 && response.data.success) {
-        toast.success("Order Created Successfully");
-        handleEmptyCart();
-        setShowBill(false);
-      }
-    } catch (error) {
-      console.error("Error submitting order:", error);
-      if (error instanceof Error) {
-        toast.error(error.message);
+        if (response.status === 200 && response.data.success) {
+          toast(<SuccessToast message={response.data.message} />, {
+            autoClose: 5000,
+          });
+          fetchPOSData(); // Refresh data
+        } else {
+          toast(
+            <ErrorToast
+              message={response.data.message || "Unexpected response format."}
+            />,
+            {
+              autoClose: 4000,
+            }
+          );
+        }
+      } catch (error: any) {
+        if (error.response && error.response.data) {
+          const errorMessage =
+            error.response.data.message || "Failed to delete service order.";
+          toast(<ErrorToast message={errorMessage} />, {
+            autoClose: 4000,
+          });
+        } else {
+          toast(
+            <ErrorToast message={"Network error. Please try again later."} />,
+            {
+              autoClose: 4000,
+            }
+          );
+        }
       }
     }
   };
 
-  const categories = [
-    "All",
-    "Refrigerator",
-    "Air Conditioner",
-    "Heater",
-    "Aqua Water Purifier",
+  const columns = [
+        {
+            name: "SN",
+            cell: (_: POSType, index: number) => index + 1,
+            sortable: false,
+            width: "60px",
+        },
+        {
+            name: "Order ID",
+            selector: (row: POSType) => row.orderId,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "Date",
+            selector: (row: POSType) => row.date,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "Customer",
+            selector: (row: POSType) => row.customer,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "Customer Type",
+            selector: (row: POSType) => row.customerType,
+            wrap: true,
+            sortable: true
+        },
+        {
+            name: "Sub Total",
+            selector: (row: POSType) => row.subTotal.toFixed(2),
+            sortable: true
+        },
+        {
+            name: "Discount(%)",
+            selector: (row: POSType) => row.discount,
+            sortable: true
+        },
+        {
+            name: "Tax(%)",
+            selector: (row: POSType) => row.tax,
+        },
+        {
+            name: "Total",
+            selector: (row: POSType) => row.totalPrice.toFixed(2),
+        },
+        {
+        name: "Action",
+        cell: (row: POSType) => (
+            <div className="inline-flex space-x-2">
+            <ShowIcon link={`/admin/billing/show/${row.id}`} />
+            {canEditPos && (
+              <EditIcon link={`/admin/billing/edit/${row.id}`} />
+            )}
+            {/* {canDeletePos && (
+              <DeleteIcon onClick={() => handleAction("delete", row.id)} />
+            )} */}
+             {/* <PrintIcon onClick={() => printBill(row)} /> */}
+            </div>
+        ),
+        sortable: false,
+        },
   ];
 
-  const TAX_RATE = 0.13;
-  const subTotal = cartItems.reduce(
-    (sum, item) => sum + item.sellingPrice * item.quantity,
-    0
-  );
-  const discountAmount = (discount * subTotal) / 100 || 0;
-  const tax = (subTotal - discountAmount) * TAX_RATE;
-  const total = subTotal - discountAmount + tax;
+  const handlePrint = useReactToPrint({
+    contentRef,
+    documentTitle: "Service Invoice",
+    onAfterPrint: async () => {
+      console.log("Print completed");
+    },
+    onBeforePrint: async () => {
+      console.log("Preparing to print...", contentRef);
+    }
+  } as UseReactToPrintOptions);
+
+  const printBill = (bill: POSType) => {
+    setBillToPrint(bill);
+    setTimeout(() => {
+    if (contentRef.current) {
+      handlePrint(); 
+    } else {
+      console.error("Content reference is not ready for printing.");
+    }
+  }, 100);
+  };
+  const createPOS = () => {
+    navigate("/admin/pos/create");
+  }
+
+  useEffect(() => {
+    fetchPOSData();
+  }, [page, limit, sortField, sortOrder, search]);
 
   return (
-    <div className="min-h-[80vh] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          {/* Tabs for Products and Parts */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex justify-start">
-              <TabsTrigger value="products">Products</TabsTrigger>
-              <TabsTrigger value="parts">Parts</TabsTrigger>
-              {/* <TabsTrigger value="installation">Installation</TabsTrigger> */}
-            </TabsList>
-          </Tabs>
-
-          {/* Search Bar */}
-          <div className="relative">
-            {(activeTab === "products" || activeTab === "parts") && (
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            )}
-            {activeTab === "products" && (
-              <Input
-                placeholder="Search Products..."
-                value={productSearchQuery}
-                onChange={(e) => setProductSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            )}
-            {activeTab === "parts" && (
-              <Input
-                placeholder="Search Parts..."
-                value={partSearchQuery}
-                onChange={(e) => setPartSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            )}
-          </div>
-
-          {/* Grid for Products or Parts */}
-          {activeTab === "products" && products.length > 0 && (
-            <>
-              <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-                <TabsList className="w-full justify-start">
-                  {categories.map((category) => (
-                    <TabsTrigger
-                      key={category.toLowerCase()}
-                      value={category.toLowerCase()}
-                      className="flex-1"
-                    >
-                      {category}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              <ItemGrid items={products} onItemClick={handleProductClick} />
-            </>
-          )}
-          {activeTab === "parts" && parts.length > 0 && (
-            <ItemGrid items={parts} onItemClick={handlePartClick} />
-          )}
-          {activeTab === "installation" && <InstallationForm />}
-        </div>
-
-        <div className="border-l pl-4">
-          <div className="flex items-center gap-2 pb-2">
-            <CustomerSelect
-              selectedCustomer={selectedCustomer}
-              loadingText="loading"
-              showAddCustomerButton={true}
-              onChange={setSelectedCustomer}
-            ></CustomerSelect>
-          </div>
-          <div>
-            <Cart
-              items={cartItems}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemoveItem={handleRemoveItem}
-              onEmptyCart={handleEmptyCart}
-              onPay={() => {
-                setShowBill(true);
-              }}
-            />
-            <div className="border-t p-4 space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Sub-Total:</span>
-                  <span>NRP {subTotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Discount:</span>
-                  <div>
-                    <input
-                      min={0}
-                      value={discount}
-                      onChange={(e) => setDiscount(parseInt(e.target.value))}
-                      type="number"
-                      className="border px-2 w-16 rounded"
-                    />{" "}
-                    %
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax (13%):</span>
-                  <span>NRP {tax.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between font-bold">
-                  <span>Total:</span>
-                  <span>NRP {total.toLocaleString()}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 border-t pt-4 justify-end">
-                {/* <Button variant="destructive" className="w-32" onClick={onEmptyCart}>
-            Empty Cart
-          </Button> */}
-                <Button className="w-32" onClick={() => setShowBill(true)}>
-                  Pay Now
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="relative">
+      <div className="flex justify-end mt-1 h-8">
+        {canCreatePos && (
+          <AddButton title="Create Order" onClick={createPOS} />
+        )}
       </div>
-      {showBill && (
-        <Modal
-          isOpen={true}
-          onClose={() => {
-            setShowBill(false);
-          }}
-          title="Bill Detail"
-          size="4xl"
-        >
-          <Bill
-            subTotal={subTotal}
-            discount={discount}
-            discountAmount={discountAmount}
-            TAX_RATE={TAX_RATE}
-            customerId={selectedCustomer}
-            items={cartItems}
-            tax={tax}
-            total={total}
-          />
-          <div className="mt-4 flex justify-end">
-            <Button onClick={submitOrder}>Place Order</Button>
-          </div>
-        </Modal>
+      {errorMessage && (
+        <div className="alert alert-error">
+          <p>{errorMessage}</p>
+        </div>
+      )}
+      {/* Pass dynamic title */}
+      <TableLayout
+        columns={columns}
+        data={posData}
+        totalRows={totalRows}
+        page={page}
+        limit={limit}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        search={search}
+        onSearch={(search) => setSearch(search)}
+        onSort={(field, order) => {
+          setSortField(field);
+          setSortOrder(order);
+        }}
+        onPageChange={(newPage) => setPage(newPage)}
+        onLimitChange={(newLimit) => setLimit(newLimit)}
+        onAction={handleAction}
+      />
+
+      {billToPrint && (
+        <div style={{ position: "absolute", top: "-9999px", left: "-9999px" }}>
+          {/* <Invoice ref={contentRef} bill={billToPrint} /> */}
+        </div>
       )}
     </div>
   );
-}
+};
+
+export default POSIndex;

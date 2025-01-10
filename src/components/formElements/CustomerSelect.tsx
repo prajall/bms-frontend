@@ -12,9 +12,15 @@ interface Customer {
   status: string;
 }
 
+export interface CustomerOption {
+  value: string;
+  label: string;
+  image: string;
+}
+
 interface CustomerSelectProps {
   selectedCustomer: string;
-  onChange: (value: string) => void;
+  onChange: (option: CustomerOption | null) => void;
   loadingText?: string;
   showAddCustomerButton?: boolean;
 }
@@ -100,7 +106,10 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({
             // value={
             //   options.find((option) => option.value === selectedCustomer) || null
             // }
-            onChange={(option) => onChange(option ? option.value : "")}
+              // onChange={(option) => onChange(option ? option.value : "")}
+              onChange={(option) => {
+                onChange(option as CustomerOption | null); 
+              }}
             onInputChange={(inputValue, { action }) => {
               if (action === "input-change") {
                 setSearchQuery(inputValue); // Update search query state
