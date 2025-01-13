@@ -86,6 +86,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
   );
 
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [itempaymentMessage, setItemPaymentMessage] = useState<string | null>(null);
   const { serviceOrder, previousBillings, loading } = useServiceOrderByOrderId(selectedServiceOrder);
 
   const updateServiceOrders = (newServiceOrders: ServiceReference[]) => {
@@ -133,6 +134,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
             setPaymentMessage("Payment has already been made.");
             return false;
           }
+          setPaymentMessage("");
           return true;
         })
         .map((newOrder: any) => {
@@ -224,8 +226,10 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
     setPaymentMessage(null);
   };
 
-  const handlePOSOrderChange = () => {
-
+  const handlePOSOrderChange = (value: string) => {
+    setSelectedPOSOrder(value);
+    setValue('posOrder', value);
+    setItemPaymentMessage(null);
   };
 
   const handleCustomerChange = (value: string) => {
@@ -310,7 +314,7 @@ const Billings: React.FC<BillingsProps> = ({ initialData, onSubmit }) => {
                 // type={"OrderId"}
               />
               {errors.posOrder && <p className="text-red-500 text-xs mt-1">{errors.posOrder.message}</p>}
-              {paymentMessage && <p className="text-green-500 bold">{paymentMessage}</p>}
+              {itempaymentMessage && <p className="text-green-500 bold">{itempaymentMessage}</p>}
             </div>
           </div>
 

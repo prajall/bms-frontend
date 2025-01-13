@@ -23,7 +23,7 @@ const usePOSOrders = () => {
     try {
       const response = await axios.get(apiUrl, { withCredentials: true });
       if (response.status === 200 && response.data.success) {
-        setPosOrders(response.data.data);
+        setPosOrders(response.data.data.posRecords);
       }
     } catch (err) {
       console.error("Failed to fetch pos order:", err);
